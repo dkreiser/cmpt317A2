@@ -5,13 +5,21 @@ import java.util.Scanner;
 
 public class Controller {
 	
+	/**we never want to make a duplicate copy of this class.*/
 	private Controller(){}
 	
+	/**an instance of the game board*/
 	public Board myBoard = new Board();
 	
+	/**a scanner created to handle user input*/
 	private Scanner myScanner = new Scanner(System.in);
 	
-	@SuppressWarnings("static-access")
+	/**
+	 * a giant method handle the turn of the current player
+	 * to be refactored.
+	 * @param player the current player we are making the turn of
+	 * @return true if a draw occurs, false otherwise.
+	 */
 	private boolean playTurn(char player){
 		boolean lock = false;
 		int x;
@@ -90,14 +98,17 @@ public class Controller {
 		int index = myScanner.nextInt();
 		myScanner.nextLine();
 		Tuple nextMove = moveList.get(index);
-		for( gamePiece piece : myBoard.pieceArray){
+		for( gamePiece piece : myBoard.getAllUnits()){
 			if (piece.checkPosition(new Tuple(x,y))){
-				piece.updateCurrentPosition( nextMove, curPiece);
+				piece.changePosition( nextMove );
 			}
 		}
 		return true;
 	}
 	
+	/**
+	 * a method to play the game until it results in a win or a draw.
+	 */
 	public void game(){
 		while (true){
 			if (!playTurn('2')){
@@ -116,6 +127,10 @@ public class Controller {
 		System.out.println("Game over!");
 	}
 	
+	/**
+	 * where the game is played from for now.
+	 * @param args not used.
+	 */
 	public static void main(String[] args){
 		Controller testController = new Controller();
 		
