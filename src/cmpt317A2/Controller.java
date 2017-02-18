@@ -12,7 +12,7 @@ public class Controller {
 	private Scanner myScanner = new Scanner(System.in);
 	
 	@SuppressWarnings("static-access")
-	private void playTurn(char player){
+	private boolean playTurn(char player){
 		boolean lock = false;
 		int x;
 		int y;
@@ -81,6 +81,10 @@ public class Controller {
 		}
 		//movement stuff
 		ArrayList<Tuple> moveList = myBoard.availableMoves(x,y);
+		if(moveList.size() == 0){
+			System.out.println("Draw!!!!!!");
+			return false;
+		}
 		System.out.println("Here are the legal moves: " + moveList);
 		System.out.println("Enter the index of the move you would like to make");
 		int index = myScanner.nextInt();
@@ -91,20 +95,25 @@ public class Controller {
 				piece.updateCurrentPosition( nextMove, curPiece);
 			}
 		}
-		
+		return true;
 	}
 	
 	public void game(){
 		while (true){
-			playTurn('2');
+			if (!playTurn('2')){
+				break;
+			}
 			if(myBoard.gameOver()){
 				break;
 			}
-			playTurn('1');
+			if (!playTurn('1')){
+				break;
+			}
 			if(myBoard.gameOver()){
 				break;
 			}
 		}
+		System.out.println("Game over!");
 	}
 	
 	public static void main(String[] args){

@@ -14,7 +14,7 @@ public class Board {
 
 	public Board(){}
 
-	static King king = new King();
+	static gamePiece king = new King();
 	
 	static Guard guardOne   = new Guard(1,1);
 	static Guard guardTwo   = new Guard(1,2);
@@ -25,6 +25,9 @@ public class Board {
 	static Dragon dragonThree = new Dragon(3,2);
 	static Dragon dragonFour  = new Dragon(3,3);
 	static Dragon dragonFive  = new Dragon(3,4);
+	
+	static gamePiece[] teamOne = {king, guardOne, guardTwo, guardThree};
+	static gamePiece[] teamTwo = {dragonOne, dragonTwo, dragonThree, dragonFour, dragonFive};
 	
 	static gamePiece[] pieceArray = {king,
 			guardOne, guardTwo, guardThree,
