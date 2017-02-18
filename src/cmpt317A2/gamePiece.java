@@ -51,11 +51,22 @@ public abstract class gamePiece {
 	public boolean checkPosition(Tuple positionToCheck){
 		if(xPosition == positionToCheck.getX() && yPosition == positionToCheck.getY()){
 			return true;
-		}
-		else
-		{
+		} else {
 			return false;
 		}
 	}
 
+	public String toString(){
+		switch (myLetter){
+		case('K'):
+			return "King: " + getPosition();
+		case('G'):
+			return "Guard: " + getPosition();
+		case('D'):
+			return "Dragon: " + getPosition();
+		default:
+			//will never occur.
+			return "";
+		}
+	}
 }

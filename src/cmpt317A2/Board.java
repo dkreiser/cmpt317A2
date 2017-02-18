@@ -71,7 +71,9 @@ public class Board {
 	 */
 	public void printGameBoard(){
 		System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
+		System.out.println("  0 1 2 3 4");
 		for (int i = 0; i < 5; i++){
+			System.out.print(i + " ");
 			for( int k = 0; k < 5; k++){
 				System.out.print(gameBoard[i][k] + " ");
 			}
@@ -92,9 +94,7 @@ public class Board {
 	public char getPiece(int x, int y){
 		if ((x < 0) || (x > 4) || (y < 0) || (y > 4)){
 			return ' ';
-		}
-		else
-		{
+		} else {
 			return gameBoard[x][y];
 		}
 	}
@@ -179,8 +179,11 @@ public class Board {
 	 */
 	private boolean isGuard(int x, int y){
 		if ((x < 0) || (x > 4) || (y < 0) || (y > 4)) return false;
-		if(gameBoard[x][y] == 'G') return true;
-		return false;
+		if(gameBoard[x][y] == 'G'){ 
+			return true;
+		} else {
+			return false;
+		}
 	}
 
 	/**
@@ -191,23 +194,9 @@ public class Board {
 	 */
 	private boolean isLegalMove(int x, int y){
 		if ((x < 0) || (x > 4) || (y < 0) || (y > 4)) return false;
-		if(gameBoard[x][y] == '_') return true;
-		return false;
-	}
-	
-	/**
-	 * check if either the dragons have won or the king has won
-	 * does NOT check if the game is in a draw state.
-	 * @return true if either of the dragons or king win condition has been satisified, false otherwise
-	 */
-	//Method to check if the game is over, may change.
-	//	currently just checks if either team wins, but does not check for a draw
-	public boolean gameOver(){
-		if(dragonsWin() || kingWins() ){
+		if(gameBoard[x][y] == '_') {
 			return true;
-		}
-		else
-		{
+		} else {
 			return false;
 		}
 	}
@@ -218,28 +207,22 @@ public class Board {
 	 */
 	
 	//check if the dragons win condition is true
-	private boolean dragonsWin(){
+	public boolean dragonsWin(){
 		if (!king.isAlive()){
 			return true;
-		}
-		else
-		{
+		} else {
 			return false;
 		}
 	}
-
+	
 	/**
 	 * check the kings win condition
-	 * @return true if the king made it to the dragons "home" row, false otherwise.
+	 * @return true if the king is at the dragons "home row", false otherwise.
 	 */
-	
-	//check if the kings win condition is true
-	private boolean kingWins(){
-		if(king.getPosition().getY() == 4){
+	public boolean kingWins(){
+		if (king.getPosition().getX() == 4){
 			return true;
-		}
-		else
-		{
+		} else {
 			return false;
 		}
 	}
@@ -248,8 +231,9 @@ public class Board {
 	 * method used for testing purposes hopefully.
 	 * @param args not used.
 	 */
-	
 	public static void main(String[] args){
 		//we should probably write some testing code here.
+		Board testBoard = new Board();
+		testBoard.printGameBoard();
 	}
 }

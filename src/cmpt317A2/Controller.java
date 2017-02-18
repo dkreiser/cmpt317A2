@@ -15,116 +15,204 @@ public class Controller {
 	private Scanner myScanner = new Scanner(System.in);
 	
 	/**
-	 * a giant method handle the turn of the current player
-	 * to be refactored.
-	 * @param player the current player we are making the turn of
-	 * @return true if a draw occurs, false otherwise.
+	 * instructions to make player ones turn.
+	 * @return true if the game is in a draw state, false otherwise.
 	 */
-	private boolean playTurn(char player){
-		boolean lock = false;
-		int x;
-		int y;
-		char curPiece;
-		if (player == '1') {
-			myBoard.printGameBoard();
-			System.out.println("King: " + myBoard.king.getPosition());
-			System.out.println("Guard: " + myBoard.guardOne.getPosition());
-			System.out.println("Guard: " + myBoard.guardTwo.getPosition());
-			System.out.println("Guard: " + myBoard.guardThree.getPosition());
-			System.out.println("Enter the x and y coordinates, separated by a space");
-			x = myScanner.nextInt();
-			y = myScanner.nextInt();
-			myScanner.nextLine();
-			while(true){
-				curPiece = myBoard.getPiece(x, y);
-				switch(curPiece){
-				case 'K':
-					System.out.println("You are moving the King");
-					lock = true;
+	private boolean playerOneTurn(){
+		//variables used
+		gamePiece[] myUnits = myBoard.getTeamOne();
+		int xCoordinate;
+		int yCoordinate;
+		char pieceToMove;
+		ArrayList<Tuple> moveList;
+
+		//Step one: check if the game is a draw or can be continued.
+		isDraw(myUnits);
+		
+		//Step two: print the board
+		myBoard.printGameBoard();
+		
+		//Step three: list the units that the player has control over
+		printUnitList(myUnits);
+		
+		//Step four: ask the player for which piece they would like to move.
+		System.out.println("Enter the x and y coordinates of the unit you would like to move, separated by a space");
+		xCoordinate = myScanner.nextInt();
+		yCoordinate = myScanner.nextInt();
+		myScanner.nextLine(); //this line is to force the scanner to ignore any other input
+		
+		//we will keep asking the player for a valid unit until we get one.
+		while(true){ 
+			pieceToMove = myBoard.getPiece(xCoordinate, yCoordinate);
+			if (pieceToMove == 'K'){
+				System.out.println("You are moving the King at position: " + "(" + xCoordinate + "," + yCoordinate + ")");
+				//They've selected a valid unit: verify it can move before preceding.
+				moveList = myBoard.availableMoves(xCoordinate,yCoordinate);
+				if(moveList.size() != 0){
 					break;
-				case 'G':
-					System.out.println("You are moving the Guard at position: " + "(" + x + "," + y + ")");
-					lock = true;
-					break;
-				default:
-					System.out.println("Invalid input, can't move: " + curPiece);
-					x = myScanner.nextInt();
-					y = myScanner.nextInt();
-					myScanner.nextLine();
-				}
-				if(lock){
-					break;
-				}
-			}
-		}
-		else
-		{
-			myBoard.printGameBoard();
-			System.out.println("Dragon: " + myBoard.dragonOne.getPosition());
-			System.out.println("Dragon: " + myBoard.dragonTwo.getPosition());
-			System.out.println("Dragon: " + myBoard.dragonThree.getPosition());
-			System.out.println("Dragon: " + myBoard.dragonFour.getPosition());
-			System.out.println("Dragon: " + myBoard.dragonFive.getPosition());
-			System.out.println("Enter the x and y coordinates, separated by a space");
-			x = myScanner.nextInt();
-			y = myScanner.nextInt();
-			myScanner.nextLine();
-			while(true){
-				curPiece = myBoard.getPiece(x, y);
-				switch(curPiece){
-				case 'D':
-					System.out.println("You are moving the Dragon at position: " + "(" + x + "," + y + ")");
-					lock = true;
-					break;
-				default:
-					System.out.println("Invalid input, can't move: " + curPiece);
-					x = myScanner.nextInt();
-					y = myScanner.nextInt();
-					myScanner.nextLine();
-				}
-				if(lock){
-					break;
+				} else {
+					System.out.println("but the King has no available moves, please select another unit!");
 				}
 			}
+			else if(pieceToMove == 'G'){
+				System.out.println("You are moving the Guard at position: " + "(" + xCoordinate + "," + yCoordinate + ")");
+				//They've selected a valid unit: verify it can move before preceding.
+				moveList = myBoard.availableMoves(xCoordinate,yCoordinate);
+				if(moveList.size() != 0){
+					break;
+				} else {
+					System.out.println("but that Guard has no available moves, please select another unit!");
+				}
+			} else {
+				System.out.println("Invalid input, can't move: " + pieceToMove);
+				System.out.println("Please enter another coordinate");
+			}
+			xCoordinate = myScanner.nextInt();
+			yCoordinate = myScanner.nextInt();
+			myScanner.nextLine();
 		}
-		//movement stuff
-		ArrayList<Tuple> moveList = myBoard.availableMoves(x,y);
-		if(moveList.size() == 0){
-			System.out.println("Draw!!!!!!");
-			return false;
+		
+		//Step five: ask the player where they would like to move that unit and then move it.
+		moveUnit(myUnits, moveList, xCoordinate, yCoordinate, pieceToMove);
+		
+		return false;
+	}
+	
+	/**
+	 * instructions to make player twos turn.
+	 * @return true if the game is in a draw state, false otherwise.
+	 */
+	private boolean playerTwoTurn(){
+		//variables used
+		gamePiece[] myUnits = myBoard.getTeamTwo();
+		int xCoordinate;
+		int yCoordinate;
+		char pieceToMove;
+		ArrayList<Tuple> moveList;
+		
+		//Step one: Check if the game is a draw or can be continued.
+		isDraw(myUnits);
+		
+		//Step two: print the board.
+		myBoard.printGameBoard();
+		
+		//Step three: list the units that the player has control over
+		printUnitList(myUnits);
+		
+		//Step four: ask the player for which piece they would like to move.
+		System.out.println("Enter the x and y coordinates of the unit you would like to move, separated by a space");
+		xCoordinate = myScanner.nextInt();
+		yCoordinate = myScanner.nextInt();
+		myScanner.nextLine(); //this line is to force the scanner to ignore any other input
+		
+		//we will keep asking the player for a valid unit until we get one.
+		while(true){ 
+			pieceToMove = myBoard.getPiece(xCoordinate, yCoordinate);
+			if (pieceToMove == 'D'){
+				System.out.println("You are moving the Dragon at position: " + "(" + xCoordinate + "," + yCoordinate + ")");
+				//They've selected a valid unit: verify it can move before preceding.
+				moveList = myBoard.availableMoves(xCoordinate,yCoordinate);
+				if(moveList.size() != 0){
+					break;
+				}
+				else
+				{
+					System.out.println("but that dragon has no available moves, please select another one!");
+				}
+			}
+			else
+			{
+				System.out.println("Invalid input, can't move: " + pieceToMove);
+				System.out.println("Please enter another coordinate");
+			}
+			xCoordinate = myScanner.nextInt();
+			yCoordinate = myScanner.nextInt();
+			myScanner.nextLine();
 		}
+		
+		//Step five: ask the player where they would like to move that unit and then move it.
+		moveUnit(myUnits, moveList, xCoordinate, yCoordinate, pieceToMove);
+		
+		return false;
+	}
+	
+	//Helper functions to make the player turns.
+	private void moveUnit(gamePiece[] listOfUnits, ArrayList<Tuple> moveList, int xCoordinate, int yCoordinate, char piece){
 		System.out.println("Here are the legal moves: " + moveList);
-		System.out.println("Enter the index of the move you would like to make");
+		System.out.println("Enter the index of the move you would like to make (starting from 0!)");
 		int index = myScanner.nextInt();
 		myScanner.nextLine();
+		
+		//Note, we might have to make this better.
 		Tuple nextMove = moveList.get(index);
-		for( gamePiece piece : myBoard.getAllUnits()){
-			if (piece.checkPosition(new Tuple(x,y))){
-				piece.changePosition( nextMove );
+		for( gamePiece pieceToCheck : myBoard.getAllUnits()){
+			if (pieceToCheck.checkPosition(new Tuple(xCoordinate,yCoordinate))){
+				pieceToCheck.changePosition( nextMove );
+			}
+		}
+	}
+	
+	private boolean isDraw(gamePiece[] listToCheck){
+		for (gamePiece currentPiece : listToCheck){
+			Tuple currentTuple = currentPiece.getPosition();
+			if (myBoard.availableMoves(currentTuple.getX(), currentTuple.getY()).size() != 0){
+				return false;
 			}
 		}
 		return true;
+	}
+	
+	private void printUnitList(gamePiece[] listToPrint){
+		for (gamePiece currentPiece : listToPrint){
+			System.out.println(currentPiece);
+		}
 	}
 	
 	/**
 	 * a method to play the game until it results in a win or a draw.
 	 */
 	public void game(){
+		boolean draw = false;
+		boolean dragonsWin = false;
 		while (true){
-			if (!playTurn('2')){
+			if (playerTwoTurn()){ 
+				draw = true;
 				break;
 			}
-			if(myBoard.gameOver()){
+			if(myBoard.dragonsWin()){
+				dragonsWin = true;
 				break;
 			}
-			if (!playTurn('1')){
+			if(myBoard.kingWins()){
 				break;
 			}
-			if(myBoard.gameOver()){
+			if (playerOneTurn()){
+				draw = true;
+				break;
+			}
+			if(myBoard.dragonsWin()){
+				dragonsWin = true;
+				break;
+			}
+			if(myBoard.kingWins()){
 				break;
 			}
 		}
-		System.out.println("Game over!");
+		System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+		myBoard.printGameBoard();
+		if(draw){
+			System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+			System.out.println("~Nobody wins, it's a draw!~");
+			System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+		} else if(dragonsWin){
+			System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+			System.out.println("~The Dragons Win! Congratulations!~");
+			System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");			
+		} else {
+			System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+			System.out.println("~The King Wins! Congratulations!~");
+			System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");			
+		}
 	}
 	
 	/**
