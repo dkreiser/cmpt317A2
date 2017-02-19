@@ -12,37 +12,22 @@ public class Board {
 	public static char[][] gameBoard = { { '_', '_', 'K', '_', '_' }, { '_', 'G', 'G', 'G', '_' },
 			{ '_', '_', '_', '_', '_' }, { 'D', 'D', 'D', 'D', 'D' }, { '_', '_', '_', '_', '_' } };
 
-	// player ones objects
+	// player one's objects
 	King king = new King();
 	Guard guardOne = new Guard(1, 1);
 	Guard guardTwo = new Guard(1, 2);
 	Guard guardThree = new Guard(1, 3);
+	ArrayList<gamePiece> teamOne = new ArrayList<gamePiece>();
 
-	// player twos objects
+	// player two's objects
 	Dragon dragonOne = new Dragon(3, 0);
 	Dragon dragonTwo = new Dragon(3, 1);
 	Dragon dragonThree = new Dragon(3, 2);
 	Dragon dragonFour = new Dragon(3, 3);
 	Dragon dragonFive = new Dragon(3, 4);
-
-	/** an array of player ones pieces */
-
-	ArrayList<gamePiece> teamOne = new ArrayList<gamePiece>();
 	ArrayList<gamePiece> teamTwo = new ArrayList<gamePiece>();
-	ArrayList<gamePiece> allUnits = new ArrayList<gamePiece>();
 
-	// gamePiece[] teamOne = { king, guardOne, guardTwo, guardThree };
-
-	/** an array of player twos pieces */
-	// gamePiece[] teamTwo = { dragonOne, dragonTwo, dragonThree, dragonFour,
-	// dragonFive };
-
-	/** An array of all of the game pieces */
-	// gamePiece[] allUnits = { king, guardOne, guardTwo, guardThree, dragonOne,
-	// dragonTwo, dragonThree, dragonFour,
-	// dragonFive };
-
-	// constructor, doesn't need to do anything
+	// constructor, populates each team's initial list
 	public Board() {
 		teamOne.add(king);
 		teamOne.add(guardOne);
@@ -54,16 +39,6 @@ public class Board {
 		teamTwo.add(dragonThree);
 		teamTwo.add(dragonFour);
 		teamTwo.add(dragonFive);
-
-		allUnits.add(king);
-		allUnits.add(guardOne);
-		allUnits.add(guardTwo);
-		allUnits.add(guardThree);
-		allUnits.add(dragonOne);
-		allUnits.add(dragonTwo);
-		allUnits.add(dragonThree);
-		allUnits.add(dragonFour);
-		allUnits.add(dragonFive);
 	}
 
 	// Getters and setters (only the ones that are relevant
@@ -79,13 +54,6 @@ public class Board {
 	 */
 	public ArrayList<gamePiece> getTeamTwo() {
 		return teamTwo;
-	}
-
-	/**
-	 * @return allUnits: All of the units in the game
-	 */
-	public ArrayList<gamePiece> getAllUnits() {
-		return allUnits;
 	}
 
 	// Handy Print method
@@ -201,21 +169,93 @@ public class Board {
 		default:
 			break;
 		}
+		
+		// Finally, a guard or king must check if it is eligible to capture a dragon
+		if (piece == 'K' || piece == 'G') {
+			// Check if horizontally or vertically adjacent to a dragon. If so, add option to capture dragon to move list
+			// Note that none of the capture logic is in this function. As far as this function is concerned, the
+			// king or guard is simply 'moving' to a space where there is already a dragon. Logic to kill the dragon
+			// is implemented elsewhere
+			if (isDragon(x + 1,y)) {
+				if (canCaptureDragon(x + 1,y)) {
+					returnList.add(new Tuple(x + 1,y));
+				}
+			}
+			if (isDragon(x,y + 1)) {
+				if (canCaptureDragon(x,y + 1)) {
+					returnList.add(new Tuple(x,y + 1));
+				}
+			}
+			if (isDragon(x - 1,y)) {
+				if (canCaptureDragon(x - 1,y)) {
+					returnList.add(new Tuple(x - 1,y));
+				}
+			}
+			if (isDragon(x,y - 1)) {
+				if (canCaptureDragon(x,y-1)) {
+					returnList.add(new Tuple(x,y - 1));
+				}
+			}
+		}
+		
 		return returnList;
 	}
-
+	
 	/**
-	 * checks a given tile to see if it is a king
+	 * check if the dragon at the provided x,y position can be captured
+	 * 
+	 * @return true if surrounded by at least 2 guards (king counted as a "guard"), false otherwise.
+	 */
+
+	private boolean canCaptureDragon(int x, int y) {
+		int numGuards = 0;
+
+		if (isKingOrGuard(x - 1, y)) {
+			numGuards++;
+		}
+
+		if (isKingOrGuard(x, y - 1)) {
+			numGuards++;
+		}
+
+		if (isKingOrGuard(x + 1, y)) {
+			numGuards++;
+		}
+
+		if (isKingOrGuard(x, y + 1)) {
+			numGuards++;
+		}
+
+		// Uncomment to allow diagonal captures
+		/*
+		 * if (isKingOrGuard(x-1,y-1)) { numGuards++; }
+		 * 
+		 * if (isKingOrGuard(x+1,y+1)) { numGuards++; }
+		 * 
+		 * if (isKingOrGuard(x-1,y+1)) { numGuards++; }
+		 * 
+		 * if (isKingOrGuard(x+1,y-1)) { numGuards++; }
+		 */
+
+		// Make the final decision if the dragon is able to be captured
+		if (numGuards >= 2) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+	
+	/**
+	 * checks a given tile to see if it is a king or guard
 	 * 
 	 * @param x
 	 *            the x coordinate of the tile to check
 	 * @param y
 	 *            the y coordinate of the tile to check
-	 * @return true if the tile contains a 'K', false otherwise.
+	 * @return true if the tile contains a 'K' or 'G', false otherwise.
 	 */
-	@SuppressWarnings("unused")
-	private boolean isKing(int x, int y) {
-		return checkPiece(x, y, 'K');
+	private boolean isKingOrGuard(int x, int y) {
+		return checkPiece(x, y, 'K') || checkPiece(x, y, 'G');
 	}
 
 	/**
@@ -319,7 +359,6 @@ public class Board {
 			if (surroundedByDragons(currentPiece)) {
 				Dragon newDragon = new Dragon(x, y);
 				teamTwo.add(newDragon);
-				allUnits.add(newDragon);
 				currentPiece.kill();
 				// For now, deciding not to remove dead pieces from teamOne's
 				// list. Uncomment line below if this is an issue
@@ -330,6 +369,22 @@ public class Board {
 				gameBoard[x][y] = 'D';
 			}
 		}
+	}
+	
+	/**
+	 * Kills the dragon at a given x and y position provided a dragon exists at that x,y
+	 * 
+	 * Returns true on success, false otherwise
+	 */
+	public boolean killDragon(int x, int y) {
+		// Note, we might have to make this better. Finds the object which represents the piece we are killing
+		for (gamePiece pieceToCheck : teamTwo) {
+			if (pieceToCheck.checkPosition(new Tuple(x, y ))) {
+				pieceToCheck.kill();
+				return true;
+			}
+		}
+		return false;
 	}
 
 	/**

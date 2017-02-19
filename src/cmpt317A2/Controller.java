@@ -145,6 +145,7 @@ public class Controller {
 	}
 
 	// Helper functions to make the player turns.
+	// Assuming that x and y coordinates passed in are always valid
 	private void moveUnit(ArrayList<gamePiece> listOfUnits, ArrayList<Tuple> moveList, int xCoordinate, int yCoordinate,
 			char piece) {
 		int index = -1;
@@ -154,14 +155,25 @@ public class Controller {
 			index = myScanner.nextInt();
 			myScanner.nextLine();
 		}
-
-		// Note, we might have to make this better.
 		Tuple nextMove = moveList.get(index);
-		for (gamePiece pieceToCheck : myBoard.getAllUnits()) {
+		gamePiece pieceToMove = null;
+		
+		// Note, we might have to make this better. Finds the object which represents the piece we are moving
+		for (gamePiece pieceToCheck : listOfUnits) {
 			if (pieceToCheck.checkPosition(new Tuple(xCoordinate, yCoordinate))) {
-				pieceToCheck.changePosition(nextMove);
+				pieceToMove = pieceToCheck;
 			}
 		}
+		
+		// Piece capture move (king or guard is capturing dragon) if appropriate
+		if (Board.gameBoard[nextMove.getX()][nextMove.getY()] == 'D') {
+			myBoard.killDragon(nextMove.getX(), nextMove.getY());
+		}
+		
+		// Simple move to unoccupied space, overwrites D if dragon was killed
+		pieceToMove.changePosition(nextMove);
+		
+
 	}
 
 	private boolean isDraw(ArrayList<gamePiece> listToCheck) {
