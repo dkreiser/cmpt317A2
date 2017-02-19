@@ -39,10 +39,21 @@ public abstract class gamePiece {
 		return alive;
 	}
 	
+	/** a method to kill the unit (i.e. make it not alive) */
+	public void kill() {
+		alive = false;
+	}
+	
 	/** a method that creates a returns a new Tuple of our current position*/
 	public Tuple getPosition(){
 		return new Tuple(xPosition,yPosition);
 	}
+	
+	/** a method that returns the letter of the game piece*/
+	public char getMyLetter() {
+		return myLetter;
+	}
+
 	
 	/**
 	 * @param positionToCheck the position we are checking against our own.
