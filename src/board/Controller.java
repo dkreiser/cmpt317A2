@@ -1,13 +1,15 @@
-package cmpt317A2;
+package board;
 
 import java.util.ArrayList;
 import java.util.Scanner;
 
+import cmpt317A2.Tuple;
+import gamepiece.gamePiece;
+
 public class Controller {
 
 	/** we never want to make a duplicate copy of this class. */
-	private Controller() {
-	}
+	private Controller() {}
 
 	/** an instance of the game board */
 	public Board myBoard = new Board();

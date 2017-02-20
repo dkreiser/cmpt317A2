@@ -1,6 +1,12 @@
-package cmpt317A2;
+package board;
 
 import java.util.ArrayList;
+
+import cmpt317A2.Tuple;
+import gamepiece.Dragon;
+import gamepiece.Guard;
+import gamepiece.King;
+import gamepiece.gamePiece;
 
 public class Board {
 

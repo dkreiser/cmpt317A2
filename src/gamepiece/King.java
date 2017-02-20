@@ -1,4 +1,4 @@
-package cmpt317A2;
+package gamepiece;
 
 public class King extends gamePiece {
 

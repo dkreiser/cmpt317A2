@@ -1,4 +1,7 @@
-package cmpt317A2;
+package gamepiece;
+
+import board.Board;
+import cmpt317A2.Tuple;
 
 public abstract class gamePiece {
 	//Variables
@@ -27,7 +30,7 @@ public abstract class gamePiece {
 	 * of the rest of our program.
 	 * @param newPosition the position we are moving to.
 	 */
-	void changePosition(Tuple newPosition){
+	public void changePosition(Tuple newPosition){
 		Board.gameBoard[xPosition][yPosition] = '_';	
 		Board.gameBoard[newPosition.getX()][newPosition.getY()] = this.myLetter;
 		xPosition = newPosition.getX();
