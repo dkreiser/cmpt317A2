@@ -168,7 +168,7 @@ public class Controller {
 		}
 		
 		// Piece capture move (king or guard is capturing dragon) if appropriate
-		if (Board.gameBoard[nextMove.getX()][nextMove.getY()] == 'D') {
+		if (Board.gameBoard.getChar(nextMove.getX(), nextMove.getY()) == 'D') {
 			myBoard.killDragon(nextMove.getX(), nextMove.getY());
 		}
 		

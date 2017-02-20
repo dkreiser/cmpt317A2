@@ -31,8 +31,8 @@ public abstract class gamePiece {
 	 * @param newPosition the position we are moving to.
 	 */
 	public void changePosition(Tuple newPosition){
-		Board.gameBoard[xPosition][yPosition] = '_';	
-		Board.gameBoard[newPosition.getX()][newPosition.getY()] = this.myLetter;
+		Board.gameBoard.setChar(xPosition, yPosition, '_');	
+		Board.gameBoard.setChar(newPosition.getX(), newPosition.getY(), this.myLetter);
 		xPosition = newPosition.getX();
 		yPosition = newPosition.getY();
 	}

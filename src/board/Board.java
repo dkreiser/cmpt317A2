@@ -12,11 +12,12 @@ public class Board {
 
 	// Variables
 	/** hard coded game board */
-	// Note: static variables are generally not good, but i think it would
-	// require
-	// too many alterations to make this not static.
-	public static char[][] gameBoard = { { '_', '_', 'K', '_', '_' }, { '_', 'G', 'G', 'G', '_' },
-			{ '_', '_', '_', '_', '_' }, { 'D', 'D', 'D', 'D', 'D' }, { '_', '_', '_', '_', '_' } };
+	static char[][] startingArray = {{ '_', '_', 'K', '_', '_' },
+			   				  	 	 { '_', 'G', 'G', 'G', '_' },
+			   				  		 { '_', '_', '_', '_', '_' },
+			   				  		 { 'D', 'D', 'D', 'D', 'D' },
+			   				  		 { '_', '_', '_', '_', '_' }};
+	public static State gameBoard = new State(startingArray);
 
 	// player one's objects
 	King king = new King();
@@ -72,7 +73,7 @@ public class Board {
 		for (int i = 0; i < 5; i++) {
 			System.out.print(i + " ");
 			for (int k = 0; k < 5; k++) {
-				System.out.print(gameBoard[i][k] + " ");
+				System.out.print(gameBoard.getChar(i, k) + " ");
 			}
 			System.out.println();
 		}
@@ -96,7 +97,7 @@ public class Board {
 		if ((x < 0) || (x > 4) || (y < 0) || (y > 4)) {
 			return ' ';
 		} else {
-			return gameBoard[x][y];
+			return gameBoard.getChar(x,y);
 		}
 	}
 
@@ -114,7 +115,7 @@ public class Board {
 	// Given an x and y coordinate, return all of the moves that can be made
 	// by the unit on that tile.
 	public ArrayList<Tuple> availableMoves(int x, int y) {
-		char piece = gameBoard[x][y];
+		char piece = gameBoard.getChar(x,y);
 		ArrayList<Tuple> returnList = new ArrayList<Tuple>();
 
 		if (piece == '_') {
@@ -317,7 +318,7 @@ public class Board {
 	private boolean checkPiece(int x, int y, char letter) {
 		if ((x < 0) || (x > 4) || (y < 0) || (y > 4))
 			return false;
-		if (gameBoard[x][y] == letter) {
+		if (gameBoard.getChar(x,y) == letter) {
 			return true;
 		} else {
 			return false;
@@ -372,7 +373,7 @@ public class Board {
 
 				// The dragon must be replacing a guard, otherwise there is a
 				// serious problem
-				gameBoard[x][y] = 'D';
+				gameBoard.setChar(x,y, 'D');
 			}
 		}
 	}
