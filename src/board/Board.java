@@ -1,6 +1,7 @@
 package board;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 
 import cmpt317A2.Tuple;
 import gamepiece.Dragon;
@@ -12,11 +13,8 @@ public class Board {
 
 	// Variables
 	/** hard coded game board */
-	static char[][] startingArray = {{ '_', '_', 'K', '_', '_' },
-			   				  	 	 { '_', 'G', 'G', 'G', '_' },
-			   				  		 { '_', '_', '_', '_', '_' },
-			   				  		 { 'D', 'D', 'D', 'D', 'D' },
-			   				  		 { '_', '_', '_', '_', '_' }};
+	static char[][] startingArray = { { '_', '_', 'K', '_', '_' }, { '_', 'G', 'G', 'G', '_' },
+			{ '_', '_', '_', '_', '_' }, { 'D', 'D', 'D', 'D', 'D' }, { '_', '_', '_', '_', '_' } };
 	public static State gameBoard = new State(startingArray);
 
 	// player one's objects
@@ -97,7 +95,7 @@ public class Board {
 		if ((x < 0) || (x > 4) || (y < 0) || (y > 4)) {
 			return ' ';
 		} else {
-			return gameBoard.getChar(x,y);
+			return gameBoard.getChar(x, y);
 		}
 	}
 
@@ -115,7 +113,7 @@ public class Board {
 	// Given an x and y coordinate, return all of the moves that can be made
 	// by the unit on that tile.
 	public ArrayList<Tuple> availableMoves(int x, int y) {
-		char piece = gameBoard.getChar(x,y);
+		char piece = gameBoard.getChar(x, y);
 		ArrayList<Tuple> returnList = new ArrayList<Tuple>();
 
 		if (piece == '_') {
@@ -176,42 +174,122 @@ public class Board {
 		default:
 			break;
 		}
-		
-		// Finally, a guard or king must check if it is eligible to capture a dragon
+
+		// Finally, a guard or king must check if it is eligible to capture a
+		// dragon
 		if (piece == 'K' || piece == 'G') {
-			// Check if horizontally or vertically adjacent to a dragon. If so, add option to capture dragon to move list
-			// Note that none of the capture logic is in this function. As far as this function is concerned, the
-			// king or guard is simply 'moving' to a space where there is already a dragon. Logic to kill the dragon
+			// Check if horizontally or vertically adjacent to a dragon. If so,
+			// add option to capture dragon to move list
+			// Note that none of the capture logic is in this function. As far
+			// as this function is concerned, the
+			// king or guard is simply 'moving' to a space where there is
+			// already a dragon. Logic to kill the dragon
 			// is implemented elsewhere
-			if (isDragon(x + 1,y)) {
-				if (canCaptureDragon(x + 1,y)) {
-					returnList.add(new Tuple(x + 1,y));
+			if (isDragon(x + 1, y)) {
+				if (canCaptureDragon(x + 1, y)) {
+					returnList.add(new Tuple(x + 1, y));
 				}
 			}
-			if (isDragon(x,y + 1)) {
-				if (canCaptureDragon(x,y + 1)) {
-					returnList.add(new Tuple(x,y + 1));
+			if (isDragon(x, y + 1)) {
+				if (canCaptureDragon(x, y + 1)) {
+					returnList.add(new Tuple(x, y + 1));
 				}
 			}
-			if (isDragon(x - 1,y)) {
-				if (canCaptureDragon(x - 1,y)) {
-					returnList.add(new Tuple(x - 1,y));
+			if (isDragon(x - 1, y)) {
+				if (canCaptureDragon(x - 1, y)) {
+					returnList.add(new Tuple(x - 1, y));
 				}
 			}
-			if (isDragon(x,y - 1)) {
-				if (canCaptureDragon(x,y-1)) {
-					returnList.add(new Tuple(x,y - 1));
+			if (isDragon(x, y - 1)) {
+				if (canCaptureDragon(x, y - 1)) {
+					returnList.add(new Tuple(x, y - 1));
 				}
 			}
 		}
-		
+
 		return returnList;
 	}
-	
+
+	/**
+	 * Successor function for the AI searches
+	 * 
+	 * @param s
+	 *            A given game state
+	 * @param dragonsTurn
+	 *            True if it is the dragons' turn - false if it is the king's
+	 *            turn
+	 * @return All the possible state successors from that particular state
+	 */
+	public LinkedList<State> successors(State s) {
+		LinkedList<State> successors = new LinkedList<State>();
+		ArrayList<Tuple> currentMoves;
+		Tuple currentPosition;
+		ArrayList<gamePiece> currentTeam;
+
+		if (s.dragonsJustMoved()) {
+			currentTeam = teamTwo;
+		} else {
+			currentTeam = teamOne;
+		}
+
+		// Loop over all the team's pieces and find all the possible successor
+		// states from the given state
+		for (gamePiece pieceToCheck : currentTeam) {
+			currentPosition = pieceToCheck.getPosition();
+			currentMoves = availableMoves(currentPosition.getX(), currentPosition.getY());
+
+			// Loop over all possible moves for current piece and add their
+			// resulting state to the list
+			for (Tuple move : currentMoves) {
+				successors.addLast(new State(s, currentPosition, move, pieceToCheck.getMyLetter()));
+			}
+		}
+
+		return successors;
+	}
+
+	/**
+	 * Terminal function for the AI searches
+	 * 
+	 * @param s
+	 *            A given game state
+	 * @return True if the state indicates game is won, false otherwise
+	 */
+	public boolean terminalState(State s) {
+		if (dragonsWin() || kingWins()) {
+			s.stateIsWin();
+			return true;
+		} else if (successors(s).isEmpty()) {
+			return true; // It is a draw. No winners, but the game is over. Might need to improve speed of above
+		} else {
+			return false;
+		}
+	}
+
+	/**
+	 * Return the final value of the given terminal GameState for the AI
+	 * searches
+	 *
+	 * @param s
+	 *            A given game state
+	 *
+	 */
+	// Might need to be changed - not sure if dragons winning is -1 or 1
+	public double utility(State s) {
+		if (!s.isCurrentStateAWin()) { // a win was recorded in terminalState()
+			return 0;
+		} else if (s.dragonsJustMoved()) {
+			return 1;
+		} else {
+			return -1;
+		}
+	}
+
 	/**
 	 * check if the dragon at the provided x,y position can be captured
 	 * 
-	 * @return true if surrounded by at least 2 guards (king counted as a "guard"), false otherwise.
+	 * @return true if surrounded by at least 2 guards (king counted as a
+	 *         "guard"), false otherwise.
 	 */
 
 	private boolean canCaptureDragon(int x, int y) {
@@ -251,7 +329,7 @@ public class Board {
 			return false;
 		}
 	}
-	
+
 	/**
 	 * checks a given tile to see if it is a king or guard
 	 * 
@@ -318,7 +396,7 @@ public class Board {
 	private boolean checkPiece(int x, int y, char letter) {
 		if ((x < 0) || (x > 4) || (y < 0) || (y > 4))
 			return false;
-		if (gameBoard.getChar(x,y) == letter) {
+		if (gameBoard.getChar(x, y) == letter) {
 			return true;
 		} else {
 			return false;
@@ -373,20 +451,22 @@ public class Board {
 
 				// The dragon must be replacing a guard, otherwise there is a
 				// serious problem
-				gameBoard.setChar(x,y, 'D');
+				gameBoard.setChar(x, y, 'D');
 			}
 		}
 	}
-	
+
 	/**
-	 * Kills the dragon at a given x and y position provided a dragon exists at that x,y
+	 * Kills the dragon at a given x and y position provided a dragon exists at
+	 * that x,y
 	 * 
 	 * Returns true on success, false otherwise
 	 */
 	public boolean killDragon(int x, int y) {
-		// Note, we might have to make this better. Finds the object which represents the piece we are killing
+		// Note, we might have to make this better. Finds the object which
+		// represents the piece we are killing
 		for (gamePiece pieceToCheck : teamTwo) {
-			if (pieceToCheck.checkPosition(new Tuple(x, y ))) {
+			if (pieceToCheck.checkPosition(new Tuple(x, y))) {
 				pieceToCheck.kill();
 				return true;
 			}

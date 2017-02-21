@@ -1,18 +1,45 @@
 package gameTree;
 
-import java.util.ArrayList;
-
-import cmpt317A2.Tuple;
 import board.State;
 
 public class GameNode {
 	
-	private ArrayList<GameNode> children;
-	private Tuple lastMoveMade;
-	private State myState;
-	private int depth;
+	//private ArrayList<GameNode> children;
+	protected State state;
+	protected double value;
+	protected int depth;
 	
-	public GameNode( Tuple newValue, int currentDepth, State state){
+	public GameNode(State state, double value, int depth) {
+		this.state = state;
+		this.value = value;
+		this.depth = depth;
+	}
+
+	public State getState() {
+		return state;
+	}
+
+	public double getValue() {
+		return value;
+	}
+
+	public int getDepth() {
+		return depth;
+	}
+
+	public void setState(State state) {
+		this.state = state;
+	}
+
+	public void setValue(double value) {
+		this.value = value;
+	}
+
+	public void setDepth(int depth) {
+		this.depth = depth;
+	}
+	
+	/*public GameNode( Tuple newValue, int currentDepth, State state){
 		lastMoveMade = newValue;
 		depth = currentDepth;
 		myState = state;
@@ -44,5 +71,5 @@ public class GameNode {
 		if(children.contains(childToRemove)){
 			children.remove(childToRemove);
 		}
-	}
+	}*/
 }
