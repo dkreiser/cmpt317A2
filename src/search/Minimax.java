@@ -9,6 +9,8 @@ import gameTree.GameNode;
 
 public class Minimax {
 	
+	final int depthLimit = 6;
+	
 	private Board gameBoard;
 	
 	public Minimax(Board b) {
@@ -27,11 +29,16 @@ public class Minimax {
 	// the two mutually recursive functions
 	// only difference is the way the "best" successor
 	// is determined
-
 	private GameNode MaxValue(GameNode s) {
 
 		//m_countNodesVisited++;
 		if (gameBoard.terminalState(s.getState())) {
+			s.setValue(gameBoard.utility(s.getState()));
+			return s;
+		}
+		
+		//depth-limiting
+		if(s.getDepth() == depthLimit){	
 			s.setValue(gameBoard.utility(s.getState()));
 			return s;
 		}
@@ -58,6 +65,12 @@ public class Minimax {
 
 		//m_countNodesVisited++;
 		if (gameBoard.terminalState(s.getState())) {
+			s.setValue(gameBoard.utility(s.getState()));
+			return s;
+		}
+		
+		//depth-limiting
+		if(s.getDepth() == depthLimit){
 			s.setValue(gameBoard.utility(s.getState()));
 			return s;
 		}

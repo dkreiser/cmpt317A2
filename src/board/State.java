@@ -31,8 +31,16 @@ public class State {
 		return gameBoard[x][y];
 	}
 	
+	public char getChar(Tuple x){
+		return getChar(x.getX(), x.getY());
+	}
+	
 	public void setChar(int x, int y, char newChar){
 		gameBoard[x][y] = newChar;
+	}
+	
+	public void setChar(Tuple x, char newChar){
+		setChar(x.getX(), x.getY(), newChar);
 	}
 	
 	public boolean dragonsJustMoved() {

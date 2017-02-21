@@ -2,6 +2,8 @@ package board;
 
 import java.util.ArrayList;
 import java.util.Scanner;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import cmpt317A2.Tuple;
 import gamepiece.gamePiece;
@@ -29,6 +31,9 @@ public class Controller {
 		int yCoordinate;
 		char pieceToMove;
 		ArrayList<Tuple> moveList;
+		
+		//The input pattern.
+		Pattern whichPiece = Pattern.compile("[0-4] [0-4]");
 
 		// Step one: check if the game is a draw or can be continued.
 		isDraw(myUnits);
@@ -39,12 +44,22 @@ public class Controller {
 		// Step three: list the units that the player has control over
 		printUnitList(myUnits);
 
+
 		// Step four: ask the player for which piece they would like to move.
+		// this bit of code stops the user from entering invalid input and crashing the program
 		System.out.println("Enter the x and y coordinates of the unit you would like to move, separated by a space");
-		xCoordinate = myScanner.nextInt();
-		yCoordinate = myScanner.nextInt();
-		myScanner.nextLine(); // this line is to force the scanner to ignore any
-								// other input
+		String input = myScanner.nextLine();
+		Matcher userInput = whichPiece.matcher(input);
+
+		while (!userInput.matches()){
+			System.out.println("Enter the x and y coordinates of the unit you would like to move, separated by a space");
+			System.out.println("\tExample: 0 0");
+			input = myScanner.nextLine();
+			userInput = whichPiece.matcher(input);
+		}
+		
+		xCoordinate = Character.getNumericValue(input.charAt(0));
+		yCoordinate = Character.getNumericValue(input.charAt(2));
 
 		// we will keep asking the player for a valid unit until we get one.
 		while (true) {
@@ -75,9 +90,18 @@ public class Controller {
 				System.out.println("Invalid input, can't move: " + pieceToMove);
 				System.out.println("Please enter another coordinate");
 			}
-			xCoordinate = myScanner.nextInt();
-			yCoordinate = myScanner.nextInt();
-			myScanner.nextLine();
+			input = myScanner.nextLine();
+			userInput = whichPiece.matcher(input);
+
+			while (!userInput.matches()){
+				System.out.println("Enter the x and y coordinates of the unit you would like to move, separated by a space");
+				System.out.println("\tExample: 0 0");
+				input = myScanner.nextLine();
+				userInput = whichPiece.matcher(input);
+			}
+			
+			xCoordinate = Character.getNumericValue(input.charAt(0));
+			yCoordinate = Character.getNumericValue(input.charAt(2));
 		}
 
 		// Step five: ask the player where they would like to move that unit and
@@ -99,7 +123,10 @@ public class Controller {
 		int yCoordinate;
 		char pieceToMove;
 		ArrayList<Tuple> moveList;
-
+		
+		//The input pattern.
+		Pattern whichPiece = Pattern.compile("[0-4] [0-4]");
+		
 		// Step one: Check if the game is a draw or can be continued.
 		isDraw(myUnits);
 
@@ -110,11 +137,20 @@ public class Controller {
 		printUnitList(myUnits);
 
 		// Step four: ask the player for which piece they would like to move.
+		// this bit of code stops the user from entering invalid input and crashing the program
 		System.out.println("Enter the x and y coordinates of the unit you would like to move, separated by a space");
-		xCoordinate = myScanner.nextInt();
-		yCoordinate = myScanner.nextInt();
-		myScanner.nextLine(); // this line is to force the scanner to ignore any
-								// other input
+		String input = myScanner.nextLine();
+		Matcher userInput = whichPiece.matcher(input);
+
+		while (!userInput.matches()){
+			System.out.println("Enter the x and y coordinates of the unit you would like to move, separated by a space");
+			System.out.println("\tExample: 0 0");
+			input = myScanner.nextLine();
+			userInput = whichPiece.matcher(input);
+		}
+		
+		xCoordinate = Character.getNumericValue(input.charAt(0));
+		yCoordinate = Character.getNumericValue(input.charAt(2));
 
 		// we will keep asking the player for a valid unit until we get one.
 		while (true) {
@@ -134,9 +170,18 @@ public class Controller {
 				System.out.println("Invalid input, can't move: " + pieceToMove);
 				System.out.println("Please enter another coordinate");
 			}
-			xCoordinate = myScanner.nextInt();
-			yCoordinate = myScanner.nextInt();
-			myScanner.nextLine();
+			input = myScanner.nextLine();
+			userInput = whichPiece.matcher(input);
+
+			while (!userInput.matches()){
+				System.out.println("Enter the x and y coordinates of the unit you would like to move, separated by a space");
+				System.out.println("\tExample: 0 0");
+				input = myScanner.nextLine();
+				userInput = whichPiece.matcher(input);
+			}
+			
+			xCoordinate = Character.getNumericValue(input.charAt(0));
+			yCoordinate = Character.getNumericValue(input.charAt(2));
 		}
 
 		// Step five: ask the player where they would like to move that unit and
@@ -150,12 +195,24 @@ public class Controller {
 	// Assuming that x and y coordinates passed in are always valid
 	private void moveUnit(ArrayList<gamePiece> listOfUnits, ArrayList<Tuple> moveList, int xCoordinate, int yCoordinate,
 			char piece) {
+		
+		//The input pattern. Since there is already range error checking,
+		//this will just make sure that the input isn't going to simply
+		//crash the program.
+		Pattern whichSpot = Pattern.compile("\\d{1}");
+		String input;
+		Matcher userInput;
+		
 		int index = -1;
+		
 		while ((index < 0) || (index >= moveList.size())) {
-			System.out.println("Here are the legal moves: " + moveList);
-			System.out.println("Enter the index of the move you would like to make (starting from 0!)");
-			index = myScanner.nextInt();
-			myScanner.nextLine();
+			do{
+				System.out.println("Here are the legal moves: " + moveList);
+				System.out.println("Enter the index of the move you would like to make (starting from 0!)");
+				input = myScanner.nextLine();
+				userInput = whichSpot.matcher(input);
+			}while (!userInput.matches());
+			index = Integer.parseInt(input);
 		}
 		Tuple nextMove = moveList.get(index);
 		gamePiece pieceToMove = null;

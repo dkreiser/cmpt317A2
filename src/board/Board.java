@@ -268,12 +268,41 @@ public class Board {
 	 */
 	// Might need to be changed - not sure if dragons winning is -1 or 1
 	public double utility(State s) {
-		if (!s.isCurrentStateAWin()) { // a win was recorded in terminalState()
-			return 0;
-		} else if (s.dragonsJustMoved()) {
-			return 1;
+//		if (!s.isCurrentStateAWin()) { // a win was recorded in terminalState()
+//			return 0;
+//		} else if (s.dragonsJustMoved()) {
+//			return 1;
+//		} else {
+//			return -1;
+//		}
+		if (terminalState(s)){
+			if(s.dragonsJustMoved() && s.isCurrentStateAWin()){
+				return 100;
+			} else if(!s.dragonsJustMoved() && s.isCurrentStateAWin()){
+				return -100;
+			} else {
+				return 0;
+			}
 		} else {
-			return -1;
+			LinkedList<Tuple> teamOne = new LinkedList<Tuple>();
+			LinkedList<Tuple> teamTwo = new LinkedList<Tuple>();
+			char[][] stateBoard = s.getBoard();
+			
+			for (int x = 0; x < 5; x++){
+				for(int y = 0; y < 5; y++){
+					char curPiece = stateBoard[x][y];
+					if (curPiece == 'K'){
+						teamOne.addFirst(new Tuple(x,y));
+					} else if (curPiece == 'G'){
+						teamOne.addLast(new Tuple(x,y));
+					} else if (curPiece == 'D'){
+						teamTwo.add(new Tuple(x,y));
+					}
+				}
+			}
+			
+			return ((teamOne.getFirst().getX()+1) * (-1));
+			
 		}
 	}
 
