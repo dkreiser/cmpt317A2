@@ -7,16 +7,12 @@ public class State {
 	private char[][] gameBoard;
 	private boolean dragonsMoved;
 	private boolean wasWin;
-	
-
-
 
 	public State(char[][] newBoard){
 		gameBoard = newBoard;
 		dragonsMoved = false;
 		wasWin = false;
 	}
-	
 	
 	// Constructor used in successor function
 	public State(State s, Tuple oldPosition, Tuple newPosition, char letter){
@@ -43,11 +39,9 @@ public class State {
 		return dragonsMoved;
 	}
 
-
 	public boolean isCurrentStateAWin() {
 		return wasWin;
 	}
-
 
 	public void stateIsWin() {
 		this.wasWin = true;

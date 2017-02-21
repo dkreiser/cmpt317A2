@@ -46,7 +46,6 @@ public class Board {
 		teamTwo.add(dragonFive);
 	}
 
-	// Getters and setters (only the ones that are relevant
 	/**
 	 * @return teamOne: The units associated with team one
 	 */
@@ -61,7 +60,6 @@ public class Board {
 		return teamTwo;
 	}
 
-	// Handy Print method
 	/**
 	 * print the game board in its current state adds some nice formatting.
 	 */
@@ -88,9 +86,6 @@ public class Board {
 	 * @return a space if the coordinates were invalid, otherwise the character
 	 *         on the tile
 	 */
-	// check if the coordinates given are valid
-	// if they are valid, return the gamepiece at that location
-	// if they aren't valid, return a space
 	public char getPiece(int x, int y) {
 		if ((x < 0) || (x > 4) || (y < 0) || (y > 4)) {
 			return ' ';
@@ -109,9 +104,6 @@ public class Board {
 	 * @return an arrayList of tuples that contain all of the (x,y) pairs of the
 	 *         valid moves we can make.
 	 */
-
-	// Given an x and y coordinate, return all of the moves that can be made
-	// by the unit on that tile.
 	public ArrayList<Tuple> availableMoves(int x, int y) {
 		char piece = gameBoard.getChar(x, y);
 		ArrayList<Tuple> returnList = new ArrayList<Tuple>();
