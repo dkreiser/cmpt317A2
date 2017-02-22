@@ -9,7 +9,9 @@ import gameTree.GameNode;
 
 public class Minimax {
 	
-	final int depthLimit = 2;
+	//takes about a minute at 6
+	//mathematically, 7 should take around 10 minutes, and 8 around 5 hours.
+	final int depthLimit = 6;
 	
 	private Board gameBoard;
 	
