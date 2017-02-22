@@ -219,9 +219,9 @@ public class Board {
 		ArrayList<gamePiece> currentTeam;
 
 		if (s.dragonsJustMoved()) {
-			currentTeam = teamTwo;
-		} else {
 			currentTeam = teamOne;
+		} else {
+			currentTeam = teamTwo;
 		}
 
 		// Loop over all the team's pieces and find all the possible successor
@@ -249,7 +249,7 @@ public class Board {
 	 */
 	public boolean terminalState(State s) {
 		if (dragonsWin() || kingWins()) {
-			s.stateIsWin();
+			s.stateIsWinner();
 			return true;
 		} else if (successors(s).isEmpty()) {
 			return true; // It is a draw. No winners, but the game is over. Might need to improve speed of above
@@ -268,17 +268,10 @@ public class Board {
 	 */
 	// Might need to be changed - not sure if dragons winning is -1 or 1
 	public double utility(State s) {
-//		if (!s.isCurrentStateAWin()) { // a win was recorded in terminalState()
-//			return 0;
-//		} else if (s.dragonsJustMoved()) {
-//			return 1;
-//		} else {
-//			return -1;
-//		}
 		if (terminalState(s)){
-			if(s.dragonsJustMoved() && s.isCurrentStateAWin()){
+			if(s.dragonsJustMoved() && s.potentialBoardWins()){
 				return 100;
-			} else if(!s.dragonsJustMoved() && s.isCurrentStateAWin()){
+			} else if(!s.dragonsJustMoved() && s.potentialBoardWins()){
 				return -100;
 			} else {
 				return 0;
@@ -300,9 +293,7 @@ public class Board {
 					}
 				}
 			}
-			
-			return ((teamOne.getFirst().getX()+1) * (-1));
-			
+			return ((teamOne.getFirst().getX()+1) * (-1));	
 		}
 	}
 
@@ -312,7 +303,6 @@ public class Board {
 	 * @return true if surrounded by at least 2 guards (king counted as a
 	 *         "guard"), false otherwise.
 	 */
-
 	private boolean canCaptureDragon(int x, int y) {
 		int numGuards = 0;
 
@@ -451,6 +441,7 @@ public class Board {
 	 * check if any guards have been captured
 	 */
 	public void checkGuardCapture() {
+		LinkedList<gamePiece> killList = new LinkedList<gamePiece>();
 		for (gamePiece currentPiece : teamOne) {
 			// Only consider alive guards
 			if ((currentPiece.getMyLetter() != 'G') || (currentPiece.isAlive() == false)) {
@@ -466,6 +457,8 @@ public class Board {
 				Dragon newDragon = new Dragon(x, y);
 				teamTwo.add(newDragon);
 				currentPiece.kill();
+				killList.add(currentPiece);
+				
 				// For now, deciding not to remove dead pieces from teamOne's
 				// list. Uncomment line below if this is an issue
 				// teamOne.remove(currentPiece);
@@ -475,6 +468,11 @@ public class Board {
 				gameBoard.setChar(x, y, 'D');
 			}
 		}
+		
+		while(!killList.isEmpty()){
+			teamOne.remove(killList.removeFirst());
+		}
+		
 	}
 
 	/**
@@ -489,6 +487,7 @@ public class Board {
 		for (gamePiece pieceToCheck : teamTwo) {
 			if (pieceToCheck.checkPosition(new Tuple(x, y))) {
 				pieceToCheck.kill();
+				teamTwo.remove(pieceToCheck); //Note: this might break stuff.
 				return true;
 			}
 		}
@@ -544,6 +543,42 @@ public class Board {
 		}
 	}
 
+	
+	public void applyState(State s){
+		gameBoard = s;
+		LinkedList<Tuple> t1 = new LinkedList<Tuple>();
+		LinkedList<Tuple> t2 = new LinkedList<Tuple>();
+		char[][] stateBoard = s.getBoard();
+		
+		for (int x = 0; x < 5; x++){
+			for(int y = 0; y < 5; y++){
+				char curPiece = stateBoard[x][y];
+				if (curPiece == 'K'){
+					t1.addFirst(new Tuple(x,y));
+				} else if (curPiece == 'G'){
+					t1.addLast(new Tuple(x,y));
+				} else if (curPiece == 'D'){
+					t2.add(new Tuple(x,y));
+				}
+			}
+		}
+		
+		ArrayList<gamePiece> team;
+		if(s.dragonsJustMoved()){
+			team = teamTwo;
+	
+		} else {
+			team = teamOne;
+		}
+		
+		for(gamePiece curPiece : team){
+			if (curPiece.checkPosition(s.oldPosition)){
+				curPiece.changePosition(s.newPosition);
+			}
+		}
+		
+	}
+	
 	/**
 	 * method used for testing purposes hopefully.
 	 * 

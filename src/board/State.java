@@ -4,54 +4,89 @@ import cmpt317A2.Tuple;
 
 public class State {
 
-	private char[][] gameBoard;
-	private boolean dragonsMoved;
-	private boolean wasWin;
+	private char[][] potentialBoard = new char[5][5];
+	private boolean dragonsJustMoved;
+	private boolean potentialBoardWins;
+	public Tuple oldPosition = null;
+	public Tuple newPosition = null;
 
+	// Initial static board constructor, used once in Board.java
 	public State(char[][] newBoard){
-		gameBoard = newBoard;
-		dragonsMoved = false;
-		wasWin = false;
+		potentialBoard = newBoard;
+		dragonsJustMoved = false;
+		potentialBoardWins = false;
+	}
+	
+	// Build a new state from a previous state
+	public State(State s) {
+		for (int x = 0; x < 5; x++){
+			for(int y = 0; y < 5; y++){
+				setChar(x, y, s.getChar(x, y));
+			}
+		}
+		dragonsJustMoved = !s.dragonsJustMoved();
+		potentialBoardWins = false;
 	}
 	
 	// Constructor used in successor function
 	public State(State s, Tuple oldPosition, Tuple newPosition, char letter){
-		gameBoard = s.getBoard();
-		gameBoard[oldPosition.getX()][oldPosition.getY()] = '_';
-		gameBoard[newPosition.getX()][newPosition.getY()] = letter;
-		dragonsMoved = !s.dragonsMoved;
-		wasWin = false;
+		for (int x = 0; x < 5; x++){
+			for(int y = 0; y < 5; y++){
+				setChar(x, y, s.getChar(x, y));
+			}
+		}
+		this.oldPosition = oldPosition;
+		this.newPosition = newPosition;
+		
+		// Need to account for dragons being eaten here
+		potentialBoard[oldPosition.getX()][oldPosition.getY()] = '_';
+		potentialBoard[newPosition.getX()][newPosition.getY()] = letter;
+		dragonsJustMoved = !s.dragonsJustMoved();
+		potentialBoardWins = false;
 	}
 	
 	public char[][] getBoard(){
-		return gameBoard;
+		return potentialBoard.clone();
 	}
 	
 	public char getChar(int x, int y){
-		return gameBoard[x][y];
+		return potentialBoard[x][y];
 	}
 	
 	public char getChar(Tuple x){
-		return getChar(x.getX(), x.getY());
+		return potentialBoard[x.getX()][x.getY()];
 	}
 	
 	public void setChar(int x, int y, char newChar){
-		gameBoard[x][y] = newChar;
+		potentialBoard[x][y] = newChar;
 	}
 	
 	public void setChar(Tuple x, char newChar){
-		setChar(x.getX(), x.getY(), newChar);
+		potentialBoard[x.getX()][x.getY()] = newChar;
 	}
 	
 	public boolean dragonsJustMoved() {
-		return dragonsMoved;
+		return dragonsJustMoved;
 	}
 
-	public boolean isCurrentStateAWin() {
-		return wasWin;
+	public boolean potentialBoardWins() {
+		return potentialBoardWins;
 	}
 
-	public void stateIsWin() {
-		this.wasWin = true;
+	public void stateIsWinner() {
+		this.potentialBoardWins = true;
+	}
+	
+	public String toString(){
+		String returnString = "";
+		returnString += "  0 1 2 3 4\n";
+		for (int i = 0; i < 5; i++) {
+			returnString += (i + " ");
+			for (int k = 0; k < 5; k++) {
+				returnString += (potentialBoard[i][k] + " ");
+			}
+			returnString += "\n";
+		}
+		return returnString;
 	}
 }

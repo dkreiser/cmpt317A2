@@ -6,7 +6,9 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import cmpt317A2.Tuple;
+import gameTree.GameNode;
 import gamepiece.gamePiece;
+import search.Minimax;
 
 public class Controller {
 
@@ -116,6 +118,7 @@ public class Controller {
 	 * 
 	 * @return true if the game is in a draw state, false otherwise.
 	 */
+	@SuppressWarnings("unused")
 	private boolean playerTwoTurn() {
 		// variables used
 		ArrayList<gamePiece> myUnits = myBoard.getTeamTwo();
@@ -231,8 +234,6 @@ public class Controller {
 		
 		// Simple move to unoccupied space, overwrites D if dragon was killed
 		pieceToMove.changePosition(nextMove);
-		
-
 	}
 
 	private boolean isDraw(ArrayList<gamePiece> listToCheck) {
@@ -252,6 +253,29 @@ public class Controller {
 			}
 		}
 	}
+	
+	private boolean playAITurn(Minimax AI){
+		//Step zero: print board
+		myBoard.printGameBoard();
+		
+		//step one: get the board
+		
+
+		//Step one.five: call minimax value
+		GameNode n = AI.MinimaxValue(new GameNode(new State(Board.gameBoard.getBoard()), 0, 0), true);
+		
+		//Step two: apply the state to our board.
+		myBoard.applyState(n.getState());
+		
+		//Step Three:
+		if(n.getValue() == 0){
+			return true;
+		}
+		else
+		{
+			return false;
+		}
+	}
 
 	/**
 	 * a method to play the game until it results in a win or a draw.
@@ -259,8 +283,11 @@ public class Controller {
 	public void game() {
 		boolean draw = false;
 		boolean dragonsWin = false;
+		
+		Minimax AI = new Minimax(myBoard);
+		
 		while (true) {
-			if (playerTwoTurn()) {
+			if (playAITurn(AI)) {
 				draw = true;
 				break;
 			}

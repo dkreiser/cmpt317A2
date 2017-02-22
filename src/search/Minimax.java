@@ -9,7 +9,7 @@ import gameTree.GameNode;
 
 public class Minimax {
 	
-	final int depthLimit = 6;
+	final int depthLimit = 2;
 	
 	private Board gameBoard;
 	
@@ -17,7 +17,7 @@ public class Minimax {
 		this.gameBoard = b;
 	}
 
-	protected GameNode MinimaxValue(GameNode s, boolean MaxStarts) {
+	public GameNode MinimaxValue(GameNode s, boolean MaxStarts) {
 
 		if (MaxStarts) {
 			return MaxValue(s);
@@ -30,7 +30,6 @@ public class Minimax {
 	// only difference is the way the "best" successor
 	// is determined
 	private GameNode MaxValue(GameNode s) {
-
 		//m_countNodesVisited++;
 		if (gameBoard.terminalState(s.getState())) {
 			s.setValue(gameBoard.utility(s.getState()));
@@ -44,6 +43,7 @@ public class Minimax {
 		}
 
 		LinkedList<State> successors = gameBoard.successors(s.getState());
+		//System.out.println(successors);
 		GameNode best = null;
 		double bestValue = Double.NEGATIVE_INFINITY;
 		Iterator<State> it = successors.iterator();
@@ -62,7 +62,6 @@ public class Minimax {
 	}
 
 	private GameNode MinValue(GameNode s) {
-
 		//m_countNodesVisited++;
 		if (gameBoard.terminalState(s.getState())) {
 			s.setValue(gameBoard.utility(s.getState()));
