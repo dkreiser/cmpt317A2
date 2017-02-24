@@ -270,31 +270,105 @@ public class Board {
 	public double utility(State s) {
 		if (terminalState(s)){
 			if(s.dragonsJustMoved() && s.potentialBoardWins()){
-				return 100;
+				return 1000;
 			} else if(!s.dragonsJustMoved() && s.potentialBoardWins()){
-				return -100;
+				return -1000;
 			} else {
 				return 0;
 			}
 		} else {
-			LinkedList<Tuple> teamOne = new LinkedList<Tuple>();
-			LinkedList<Tuple> teamTwo = new LinkedList<Tuple>();
+			LinkedList<Tuple> kingTeam = new LinkedList<Tuple>();
+			LinkedList<Tuple> dragonTeam = new LinkedList<Tuple>();
 			char[][] stateBoard = s.getBoard();
 			
 			for (int x = 0; x < 5; x++){
 				for(int y = 0; y < 5; y++){
 					char curPiece = stateBoard[x][y];
 					if (curPiece == 'K'){
-						teamOne.addFirst(new Tuple(x,y));
+						kingTeam.addFirst(new Tuple(x,y));
 					} else if (curPiece == 'G'){
-						teamOne.addLast(new Tuple(x,y));
+						kingTeam.addLast(new Tuple(x,y));
 					} else if (curPiece == 'D'){
-						teamTwo.add(new Tuple(x,y));
+						dragonTeam.add(new Tuple(x,y));
 					}
 				}
 			}
-			return ((teamOne.getFirst().getX()+1) * (-1));	
+			int returnValue = 0;
+			
+			//calculates the value of the dragons
+			if(dragonTeam.size() < 4){
+				returnValue += -74;
+			} else if (dragonTeam.size() == 4){
+				returnValue += -50;
+			} else {
+				returnValue += (5 * (dragonTeam.size()));
+			}
+			
+			//calculates the value based on kings position relative to his goal
+			Tuple kingPosition = kingTeam.getFirst();
+			returnValue += (-5 * (kingPosition.getX()+1));
+			
+			//calculates the value based on number of guards
+			switch(kingTeam.size() - 1){
+				case(2):
+					returnValue += 50;
+					break;
+				case(1):
+					returnValue += 20;
+					break;
+				default:
+					break;
+			}
+			
+			//calculates the value based on dragons position relative to kings
+			int numberOfSurroundingDragons = getNumSurroundingDragons(kingPosition, s.getBoard());
+			
+			switch(numberOfSurroundingDragons){
+			case(3):
+				returnValue += 59;
+				break;
+			case(2):
+				returnValue += 35;
+				break;
+			case(1):
+				returnValue += 10;
+				break;
+			default:
+				break;
+			}
+			
+			//System.out.println(returnValue);
+			return returnValue;
 		}
+	}
+	
+	private int getNumSurroundingDragons(Tuple kingPosition, char[][] gameBoard){
+		int x = kingPosition.getX();
+		int y = kingPosition.getY();
+		int numToReturn = 0;
+		
+		boolean checkBottom = ((x+1) <= 4);
+		boolean checkTop = ((x-1) >= 0);
+		boolean checkLeft = ((y-1) >= 0);
+		boolean checkRight = ((y+1) <= 4);
+		
+		if (checkBottom && gameBoard[x+1][y] == 'D') {
+			numToReturn++;
+		}
+		
+		if (checkTop && gameBoard[x-1][y] == 'D') {
+			numToReturn++;
+		}
+		
+		if (checkRight && gameBoard[x][y+1] == 'D') {
+			numToReturn++;
+		}
+		
+		if (checkLeft && gameBoard[x][y-1] == 'D') {
+			numToReturn++;
+		}
+		
+		return numToReturn;
 	}
 
 	/**
@@ -421,7 +495,7 @@ public class Board {
 	 *         horizontal/vertical directions, false otherwise.
 	 */
 	public boolean dragonsWin() {
-		return surroundedByDragons(king);
+		return surroundedByDragons(king.getPosition().getX(), king.getPosition().getY()) >= 3;
 	}
 
 	/**
@@ -453,7 +527,7 @@ public class Board {
 
 			// If guard is surrounded by at least 3 dragons, the guard dies and
 			// is replaced with a dragon
-			if (surroundedByDragons(currentPiece)) {
+			if (surroundedByDragons(currentPiece.getPosition().getX(), currentPiece.getPosition().getY()) >= 3) {
 				Dragon newDragon = new Dragon(x, y);
 				teamTwo.add(newDragon);
 				currentPiece.kill();
@@ -502,10 +576,8 @@ public class Board {
 	 * @return true if surrounded by at least 3 dragons, false otherwise.
 	 */
 
-	private boolean surroundedByDragons(gamePiece currentPiece) {
+	private int surroundedByDragons(int x, int y) {
 		int numDragons = 0;
-		int x = currentPiece.getPosition().getX();
-		int y = currentPiece.getPosition().getY();
 
 		if (isDragon(x - 1, y)) {
 			numDragons++;
@@ -536,11 +608,7 @@ public class Board {
 		 */
 
 		// Make the final decision if the piece was captured by a dragon
-		if (numDragons >= 3) {
-			return true;
-		} else {
-			return false;
-		}
+		return numDragons;
 	}
 
 	
