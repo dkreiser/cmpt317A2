@@ -270,9 +270,9 @@ public class Board {
 	public double utility(State s) {
 		if (terminalState(s)){
 			if(s.dragonsJustMoved() && s.potentialBoardWins()){
-				return 1000;
+				return 100;
 			} else if(!s.dragonsJustMoved() && s.potentialBoardWins()){
-				return -1000;
+				return -100;
 			} else {
 				return 0;
 			}
@@ -310,11 +310,14 @@ public class Board {
 			
 			//calculates the value based on number of guards
 			switch(kingTeam.size() - 1){
-				case(2):
-					returnValue += 50;
+				case(0):
+					returnValue += 59;
 					break;
 				case(1):
-					returnValue += 20;
+					returnValue += 35;
+					break;
+				case(2):
+					returnValue += 10;
 					break;
 				default:
 					break;
@@ -324,18 +327,15 @@ public class Board {
 			int numberOfSurroundingDragons = getNumSurroundingDragons(kingPosition, s.getBoard());
 			
 			switch(numberOfSurroundingDragons){
-			case(3):
-				returnValue += 59;
-				break;
 			case(2):
-				returnValue += 35;
+				returnValue += 400;
 				break;
 			case(1):
-				returnValue += 10;
+				returnValue += 50;
 				break;
 			default:
 				break;
-			}
+		}
 			
 			//System.out.println(returnValue);
 			return returnValue;
