@@ -8,6 +8,7 @@ import java.util.regex.Pattern;
 import cmpt317A2.Tuple;
 import gameTree.GameNode;
 import gamepiece.gamePiece;
+import search.AlphaBeta;
 import search.Minimax;
 
 public class Controller {
@@ -254,14 +255,33 @@ public class Controller {
 		}
 	}
 	
-	private boolean playAITurn(Minimax AI){
+	private boolean playAlphaBetaTurn(AlphaBeta AI){
 		//Step zero: print board
 		myBoard.printGameBoard();
 		
-		//step one: get the board
+		//Step one.five: call alphabeta value
+		GameNode n = AI.AlphaBetaValue(new GameNode(new State(Board.gameBoard.getBoard()), 0, 0), true);
 		
+		//Step two: apply the state to our board.
+		System.out.println(n.getState());
+		System.out.println(n.getDepth());
+		myBoard.applyState(n.getState());
+		
+		//Step Three: Check draw
+		if(n.getValue() == 0){
+			return true;
+		}
+		else
+		{
+			return false;
+		}
+	}
+	
+	private boolean playMinimaxTurn(Minimax AI){
+		//Step zero: print board
+		myBoard.printGameBoard();
 
-		//Step one.five: call minimax value
+		//Step one: call minimax value
 		GameNode n = AI.MinimaxValue(new GameNode(new State(Board.gameBoard.getBoard()), 0, 0), true);
 		
 		//Step two: apply the state to our board.
@@ -284,10 +304,11 @@ public class Controller {
 		boolean draw = false;
 		boolean dragonsWin = false;
 		
-		Minimax AI = new Minimax(myBoard);
+		//Minimax AI = new Minimax(myBoard);
+		AlphaBeta AI = new AlphaBeta(myBoard);
 		
 		while (true) {
-			if (playAITurn(AI)) {
+			if (playAlphaBetaTurn(AI)) {
 				draw = true;
 				break;
 			}

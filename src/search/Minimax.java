@@ -11,7 +11,7 @@ public class Minimax {
 	
 	//takes about a minute at 6
 	//mathematically, 7 should take around 10 minutes, and 8 around 5 hours.
-	final int depthLimit = 5;
+	final int depthLimit = 50;
 	
 	private Board gameBoard;
 	

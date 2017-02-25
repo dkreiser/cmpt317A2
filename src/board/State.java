@@ -17,6 +17,15 @@ public class State {
 		potentialBoardWins = false;
 	}
 	
+	// Constructor, used for cloning
+	public State(char[][] newBoard, boolean djm, boolean pbw, Tuple oldPos, Tuple newPos){
+		potentialBoard = newBoard;
+		dragonsJustMoved = djm;
+		potentialBoardWins = pbw;
+		oldPosition = oldPos;
+		newPosition = newPos;
+	}
+	
 	// Build a new state from a previous state
 	public State(State s) {
 		for (int x = 0; x < 5; x++){
@@ -75,6 +84,11 @@ public class State {
 
 	public void stateIsWinner() {
 		this.potentialBoardWins = true;
+	}
+	
+	public State clone(){
+		char[][] newBoard = this.getBoard();
+		return new State(newBoard, dragonsJustMoved, potentialBoardWins, oldPosition, newPosition);
 	}
 	
 	public String toString(){

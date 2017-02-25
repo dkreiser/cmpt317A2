@@ -37,4 +37,8 @@ public class GameNode {
 	public void setDepth(int depth) {
 		this.depth = depth;
 	}
+	
+	public GameNode clone() {
+		return new GameNode(state.clone(), value, depth);
+	}
 }
