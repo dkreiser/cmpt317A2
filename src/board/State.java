@@ -22,8 +22,12 @@ public class State {
 		potentialBoard = newBoard;
 		dragonsJustMoved = djm;
 		potentialBoardWins = pbw;
-		oldPosition = oldPos;
-		newPosition = newPos;
+		if(oldPos != null){
+			oldPosition = oldPos.clone();
+		}
+		if(newPos != null){
+			newPosition = newPos.clone();
+		}
 	}
 	
 	// Build a new state from a previous state
@@ -101,6 +105,13 @@ public class State {
 			}
 			returnString += "\n";
 		}
+		
+		returnString += "Dragons Just Moved: " + dragonsJustMoved;
+		returnString += "\nPotential Board wins: " + 	potentialBoardWins;
+		returnString += "\nOld Position is: " + oldPosition;
+		returnString += "\nNew Position is: " + newPosition;
+		returnString += "\n~~~~~~~~~~\n";
+		
 		return returnString;
 	}
 }

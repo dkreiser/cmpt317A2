@@ -5,8 +5,8 @@ import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import cmpt317A2.GameNode;
 import cmpt317A2.Tuple;
-import gameTree.GameNode;
 import gamepiece.gamePiece;
 import search.AlphaBeta;
 import search.Minimax;
@@ -259,12 +259,11 @@ public class Controller {
 		//Step zero: print board
 		myBoard.printGameBoard();
 		
-		//Step one.five: call alphabeta value
-		GameNode n = AI.AlphaBetaValue(new GameNode(new State(Board.gameBoard.getBoard()), 0, 0), true);
+		//Step one: call alphabeta value
+		GameNode n = AI.reformedAlphaBeta(new GameNode(new State(Board.gameBoard.getBoard()), 0, 0),
+				Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY, true);
 		
 		//Step two: apply the state to our board.
-		System.out.println(n.getState());
-		System.out.println(n.getDepth());
 		myBoard.applyState(n.getState());
 		
 		//Step Three: Check draw

@@ -41,5 +41,9 @@ public class Tuple {
 	public String toString() {
 		return "(" + x + "," + y + ")";
 	}
+	
+	public Tuple clone(){
+		return new Tuple(this.getX(), this.getY());
+	}
 
 }

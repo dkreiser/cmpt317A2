@@ -5,7 +5,7 @@ import java.util.LinkedList;
 
 import board.Board;
 import board.State;
-import gameTree.GameNode;
+import cmpt317A2.GameNode;
 
 public class Minimax {
 	

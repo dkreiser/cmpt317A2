@@ -2,13 +2,13 @@ package cmpt317A2;
 
 import board.State;
 
-public class SimpleNode {
+public class GameNode {
 
 	protected State state;
 	protected double value;
 	protected int depth;
 	
-	public SimpleNode(State state, double value, int depth) {
+	public GameNode(State state, double value, int depth) {
 		this.state = state;
 		this.value = value;
 		this.depth = depth;
@@ -36,5 +36,18 @@ public class SimpleNode {
 
 	public void setDepth(int depth) {
 		this.depth = depth;
+	}
+	
+	public GameNode clone() {
+		return new GameNode(state.clone(), value, depth);
+	}
+	
+	public String toString(){
+		String returnString = "";
+		returnString += state.toString();
+		returnString += "Value is: " + value;
+		returnString += "\nDepth is: " + depth;
+		returnString += "\n~~~~~~~~~~\n";
+		return returnString;
 	}
 }

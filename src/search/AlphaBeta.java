@@ -5,11 +5,11 @@ import java.util.LinkedList;
 
 import board.Board;
 import board.State;
-import gameTree.GameNode;
+import cmpt317A2.GameNode;
 
 public class AlphaBeta {
 
-	final int depthLimit = 3;
+	final int depthLimit = 4;
 
 	private Board gameBoard;
 
@@ -17,78 +17,39 @@ public class AlphaBeta {
 		this.gameBoard = b;
 	}
 
-	public GameNode AlphaBetaValue(GameNode s, boolean MaxStarts) {
-
-		if (MaxStarts) {
-			return MaxValue(s, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY);
+	public GameNode reformedAlphaBeta(GameNode currentNode, double alpha, double beta, boolean startMax){
+		GameNode bestNode = currentNode.clone();
+		if (currentNode.getDepth() == depthLimit || gameBoard.terminalState(currentNode.getState())){
+			bestNode.setValue(gameBoard.utility(currentNode.getState()));
+		} else if (startMax){
+			bestNode.setValue(alpha);
+			
+			LinkedList<State> successors = gameBoard.successors(currentNode.getState());
+			
+			for (State currentState : successors){
+				GameNode currNode = new GameNode(currentState, 0, currentNode.getDepth() + 1);
+				GameNode nextNode = reformedAlphaBeta(currNode, bestNode.getValue(), beta, false);
+				
+				if(nextNode.getValue() >= bestNode.getValue()){
+					bestNode = nextNode.clone();
+					break;
+				}
+			}
 		} else {
-			return MinValue(s, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY);
-		}
-	}
-
-	// the two mutually recursive functions
-	// only difference is the way the "best" successor
-	// is determined
-	private GameNode MaxValue(GameNode s, double alpha, double beta) {
-		if (gameBoard.terminalState(s.getState()) || (s.getDepth() == depthLimit)) {
-			s.setValue(gameBoard.utility(s.getState()));
-			return s;
-		}
-		
-		LinkedList<State> successors = gameBoard.successors(s.getState());
-		Iterator<State> it = successors.iterator();
-		
-		GameNode v = s.clone();
-
-		while (it.hasNext()) {
-			State current = it.next();
-			GameNode curr = new GameNode(current, 0, s.getDepth() + 1);
+			bestNode.setValue(beta);
 			
-			v.setValue(Double.max(v.getValue(), MinValue(curr, alpha, beta).getValue()));
-			alpha = Double.max(alpha, v.getValue());
-
-			if (beta <= alpha) {
-				Double bestValue = v.getValue();
-				v = curr.clone();
-				v.setValue(bestValue);
-				break;
+			LinkedList<State> successors = gameBoard.successors(currentNode.getState());
+			
+			for (State currentState : successors){
+				GameNode currNode = new GameNode(currentState, 0, currentNode.getDepth() + 1);
+				GameNode nextNode = reformedAlphaBeta(currNode, alpha, bestNode.getValue(), true);
+				
+				if(nextNode.getValue() >= bestNode.getValue()){
+					bestNode = nextNode.clone();
+					break;
+				}
 			}
-
-			
-		}
-
-		return v;
+		}	
+		return bestNode;
 	}
-
-	private GameNode MinValue(GameNode s, double alpha, double beta) {
-		if (gameBoard.terminalState(s.getState()) || (s.getDepth() == depthLimit)) {
-			s.setValue(gameBoard.utility(s.getState()));
-			return s;
-		}
-		
-		LinkedList<State> successors = gameBoard.successors(s.getState());
-		Iterator<State> it = successors.iterator();
-
-		GameNode v = s.clone();
-
-		while (it.hasNext()) {
-			State current = it.next();
-			GameNode curr = new GameNode(current, 0, s.getDepth() + 1);
-			
-			v.setValue(Double.min(v.getValue(), MaxValue(curr, alpha, beta).getValue()));
-			beta = Double.min(beta, v.getValue());
-			
-			if (beta <= alpha) {
-				Double bestValue = v.getValue();
-				v = curr.clone();
-				v.setValue(bestValue);
-				break;
-			}
-
-			
-		}
-
-		return v;
-	}
-
 }
