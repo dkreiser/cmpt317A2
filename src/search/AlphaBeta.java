@@ -1,6 +1,5 @@
 package search;
 
-import java.util.Iterator;
 import java.util.LinkedList;
 
 import board.Board;
@@ -9,7 +8,7 @@ import cmpt317A2.GameNode;
 
 public class AlphaBeta {
 
-	final int depthLimit = 4;
+	final int depthLimit = 2;
 
 	private Board gameBoard;
 
@@ -25,12 +24,14 @@ public class AlphaBeta {
 			bestNode.setValue(alpha);
 			
 			LinkedList<State> successors = gameBoard.successors(currentNode.getState());
-			
+
 			for (State currentState : successors){
 				GameNode currNode = new GameNode(currentState, 0, currentNode.getDepth() + 1);
 				GameNode nextNode = reformedAlphaBeta(currNode, bestNode.getValue(), beta, false);
 				
-				if(nextNode.getValue() >= bestNode.getValue()){
+				Double maximum = Math.max(bestNode.getValue(), nextNode.getValue());
+				
+				if(beta <= maximum){
 					bestNode = nextNode.clone();
 					break;
 				}
@@ -44,7 +45,9 @@ public class AlphaBeta {
 				GameNode currNode = new GameNode(currentState, 0, currentNode.getDepth() + 1);
 				GameNode nextNode = reformedAlphaBeta(currNode, alpha, bestNode.getValue(), true);
 				
-				if(nextNode.getValue() >= bestNode.getValue()){
+				Double minimum = Math.min(bestNode.getValue(), nextNode.getValue());
+				
+				if(minimum <= alpha){
 					bestNode = nextNode.clone();
 					break;
 				}

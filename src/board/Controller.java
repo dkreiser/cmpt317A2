@@ -276,6 +276,7 @@ public class Controller {
 		}
 	}
 	
+	@SuppressWarnings("unused")
 	private boolean playMinimaxTurn(Minimax AI){
 		//Step zero: print board
 		myBoard.printGameBoard();

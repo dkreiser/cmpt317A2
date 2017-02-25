@@ -270,9 +270,9 @@ public class Board {
 	public double utility(State s) {
 		if (terminalState(s)){
 			if(s.dragonsJustMoved() && s.potentialBoardWins()){
-				return 100;
+				return 1000;
 			} else if(!s.dragonsJustMoved() && s.potentialBoardWins()){
-				return -100;
+				return -1000;
 			} else {
 				return 0;
 			}
@@ -297,27 +297,27 @@ public class Board {
 			
 			//calculates the value of the dragons
 			if(dragonTeam.size() < 4){
-				returnValue += -74;
-			} else if (dragonTeam.size() == 4){
 				returnValue += -50;
+			} else if (dragonTeam.size() == 4){
+				returnValue += -25;
 			} else {
-				returnValue += (5 * (dragonTeam.size()));
+				returnValue += (10 * (dragonTeam.size()));
 			}
 			
 			//calculates the value based on kings position relative to his goal
 			Tuple kingPosition = kingTeam.getFirst();
-			returnValue += (-5 * (kingPosition.getX()+1));
+			returnValue += Math.negateExact((int) (Math.pow((kingPosition.getX()+1),4)));
 			
 			//calculates the value based on number of guards
 			switch(kingTeam.size() - 1){
 				case(0):
-					returnValue += 59;
+					returnValue += 100;
 					break;
 				case(1):
-					returnValue += 35;
+					returnValue += 40;
 					break;
 				case(2):
-					returnValue += 10;
+					returnValue += 15;
 					break;
 				default:
 					break;
@@ -328,16 +328,22 @@ public class Board {
 			
 			switch(numberOfSurroundingDragons){
 			case(2):
-				returnValue += 400;
+				returnValue += 300;
 				break;
 			case(1):
 				returnValue += 50;
 				break;
 			default:
 				break;
-		}
+			}
 			
-			//System.out.println(returnValue);
+			//calculating negative points based on how far away the dragons are from the king
+			for (Tuple dragon : dragonTeam){
+				int distance = Math.abs(dragon.getX() - kingPosition.getX()) + Math.abs(dragon.getY() - kingPosition.getY());
+				returnValue -= (distance * 2);
+			}
+			
+			System.out.println(returnValue);
 			return returnValue;
 		}
 	}
