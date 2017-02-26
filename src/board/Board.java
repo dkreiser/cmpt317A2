@@ -13,27 +13,28 @@ public class Board {
 
 	// Variables
 	/** hard coded game board */
-	static char[][] startingArray = { { '_', '_', 'K', '_', '_' }, { '_', 'G', 'G', 'G', '_' },
+	private static char[][] startingArray = { { '_', '_', 'K', '_', '_' }, { '_', 'G', 'G', 'G', '_' },
 			{ '_', '_', '_', '_', '_' }, { 'D', 'D', 'D', 'D', 'D' }, { '_', '_', '_', '_', '_' } };
-	public static State gameBoard = new State(startingArray);
+	public static State actualGameState = new State(startingArray);
 
 	// player one's objects
-	King king = new King();
-	Guard guardOne = new Guard(1, 1);
-	Guard guardTwo = new Guard(1, 2);
-	Guard guardThree = new Guard(1, 3);
-	ArrayList<gamePiece> teamOne = new ArrayList<gamePiece>();
+	private King king = new King();
+	private Guard guardOne = new Guard(1, 1);
+	private Guard guardTwo = new Guard(1, 2);
+	private Guard guardThree = new Guard(1, 3);
+	private ArrayList<gamePiece> teamOne = new ArrayList<gamePiece>();
 
 	// player two's objects
-	Dragon dragonOne = new Dragon(3, 0);
-	Dragon dragonTwo = new Dragon(3, 1);
-	Dragon dragonThree = new Dragon(3, 2);
-	Dragon dragonFour = new Dragon(3, 3);
-	Dragon dragonFive = new Dragon(3, 4);
-	ArrayList<gamePiece> teamTwo = new ArrayList<gamePiece>();
+	private Dragon dragonOne = new Dragon(3, 0);
+	private Dragon dragonTwo = new Dragon(3, 1);
+	private Dragon dragonThree = new Dragon(3, 2);
+	private Dragon dragonFour = new Dragon(3, 3);
+	private Dragon dragonFive = new Dragon(3, 4);
+	private ArrayList<gamePiece> teamTwo = new ArrayList<gamePiece>();
 
-	// constructor, populates each team's initial list
-	public Board() {
+	// constructor, populates each team's initial list. This should only be
+	// called by Controller once
+	protected Board() {
 		teamOne.add(king);
 		teamOne.add(guardOne);
 		teamOne.add(guardTwo);
@@ -47,29 +48,36 @@ public class Board {
 	}
 
 	/**
-	 * @return teamOne: The units associated with team one
+	 * @return teamOne: The units associated with team one (King's team)
 	 */
-	public ArrayList<gamePiece> getTeamOne() {
+	protected ArrayList<gamePiece> getTeamOne() {
 		return teamOne;
 	}
 
 	/**
-	 * @return teamTwo: The units associated with team two
+	 * @return returns the king's gamePiece
 	 */
-	public ArrayList<gamePiece> getTeamTwo() {
+	protected gamePiece getKing() {
+		return king;
+	}
+
+	/**
+	 * @return teamTwo: The units associated with team two (Dragons' team)
+	 */
+	protected ArrayList<gamePiece> getTeamTwo() {
 		return teamTwo;
 	}
 
 	/**
-	 * print the game board in its current state adds some nice formatting.
+	 * Prints the game board in its current state with some nice formatting.
 	 */
-	public void printGameBoard() {
+	protected void printGameBoard() {
 		System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
 		System.out.println("  0 1 2 3 4");
 		for (int i = 0; i < 5; i++) {
 			System.out.print(i + " ");
 			for (int k = 0; k < 5; k++) {
-				System.out.print(gameBoard.getChar(i, k) + " ");
+				System.out.print(actualGameState.getChar(i, k) + " ");
 			}
 			System.out.println();
 		}
@@ -86,11 +94,11 @@ public class Board {
 	 * @return a space if the coordinates were invalid, otherwise the character
 	 *         on the tile
 	 */
-	public char getPiece(int x, int y) {
+	protected char getPiece(int x, int y) {
 		if ((x < 0) || (x > 4) || (y < 0) || (y > 4)) {
 			return ' ';
 		} else {
-			return gameBoard.getChar(x, y);
+			return actualGameState.getChar(x, y);
 		}
 	}
 
@@ -104,8 +112,8 @@ public class Board {
 	 * @return an arrayList of tuples that contain all of the (x,y) pairs of the
 	 *         valid moves we can make.
 	 */
-	public ArrayList<Tuple> availableMoves(int x, int y) {
-		char piece = gameBoard.getChar(x, y);
+	protected ArrayList<Tuple> availableMoves(int x, int y) {
+		char piece = actualGameState.getChar(x, y);
 		ArrayList<Tuple> returnList = new ArrayList<Tuple>();
 
 		if (piece == '_') {
@@ -178,22 +186,22 @@ public class Board {
 			// already a dragon. Logic to kill the dragon
 			// is implemented elsewhere
 			if (isDragon(x + 1, y)) {
-				if (canCaptureDragon(x + 1, y)) {
+				if (getNumSurroundingGuards(x + 1, y) >= 2) {
 					returnList.add(new Tuple(x + 1, y));
 				}
 			}
 			if (isDragon(x, y + 1)) {
-				if (canCaptureDragon(x, y + 1)) {
+				if (getNumSurroundingGuards(x, y + 1) >= 2) {
 					returnList.add(new Tuple(x, y + 1));
 				}
 			}
 			if (isDragon(x - 1, y)) {
-				if (canCaptureDragon(x - 1, y)) {
+				if (getNumSurroundingGuards(x - 1, y) >= 2) {
 					returnList.add(new Tuple(x - 1, y));
 				}
 			}
 			if (isDragon(x, y - 1)) {
-				if (canCaptureDragon(x, y - 1)) {
+				if (getNumSurroundingGuards(x, y - 1) >= 2) {
 					returnList.add(new Tuple(x, y - 1));
 				}
 			}
@@ -207,9 +215,7 @@ public class Board {
 	 * 
 	 * @param s
 	 *            A given game state
-	 * @param dragonsTurn
-	 *            True if it is the dragons' turn - false if it is the king's
-	 *            turn
+	 * 
 	 * @return All the possible state successors from that particular state
 	 */
 	public LinkedList<State> successors(State s) {
@@ -218,6 +224,7 @@ public class Board {
 		Tuple currentPosition;
 		ArrayList<gamePiece> currentTeam;
 
+		// Determine if we are giving a list of dragon states or king states
 		if (s.dragonsJustMoved()) {
 			currentTeam = teamOne;
 		} else {
@@ -241,37 +248,69 @@ public class Board {
 	}
 
 	/**
-	 * Terminal function for the AI searches
+	 * Terminal function for AI searches - indicates if the game is over
 	 * 
 	 * @param s
 	 *            A given game state
-	 * @return True if the state indicates game is won, false otherwise
+	 * @return True if the state indicates game is over, false otherwise.
 	 */
 	public boolean terminalState(State s) {
-		if (dragonsWin() || kingWins()) {
+		// To know if there is a winner, need to know where the king is
+
+		Tuple kingPosition = findKing(s.getBoard());
+		if (kingPosition == null) {
+			throw new IllegalStateException("There was no king on the board when checking terminal state!");
+		}
+
+		// Check if the dragons or kings have achieved the win state
+		if (dragonsWin(kingPosition, s.getBoard()) || kingWins(kingPosition)) {
+			// Set the state's win indicator to true
 			s.stateIsWinner();
 			return true;
 		} else if (successors(s).isEmpty()) {
-			return true; // It is a draw. No winners, but the game is over. Might need to improve speed of above
+			// If there are no possible moves from the given state, it is a
+			// draw. There is no winner.
+			return true;
 		} else {
+			// Otherwise, the game is not over yet
 			return false;
 		}
 	}
 
 	/**
-	 * Return the final value of the given terminal GameState for the AI
-	 * searches
+	 * Finds the king on a given gameBoard
+	 * 
+	 * @param gameBoard
+	 *            a 5x5 game board
+	 * @return a position Tuple with the king's position
+	 */
+	private Tuple findKing(char[][] gameBoard) {
+		char curPiece;
+		for (int x = 0; x < 5; x++) {
+			for (int y = 0; y < 5; y++) {
+				curPiece = gameBoard[x][y];
+				if (curPiece == 'K') {
+					return new Tuple(x, y);
+				}
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * Returns the utility value of a current state. Not necessarily a terminal
+	 * state. When not a terminal state, attempts to estimate who is closer to
+	 * winning
 	 *
 	 * @param s
 	 *            A given game state
 	 *
 	 */
-	// Might need to be changed - not sure if dragons winning is -1 or 1
 	public double utility(State s) {
-		if (terminalState(s)){
-			if(s.dragonsJustMoved() && s.potentialBoardWins()){
+		if (terminalState(s)) {
+			if (s.dragonsJustMoved() && s.potentialBoardWins()) {
 				return 1000;
-			} else if(!s.dragonsJustMoved() && s.potentialBoardWins()){
+			} else if (!s.dragonsJustMoved() && s.potentialBoardWins()) {
 				return -1000;
 			} else {
 				return 0;
@@ -280,110 +319,132 @@ public class Board {
 			LinkedList<Tuple> kingTeam = new LinkedList<Tuple>();
 			LinkedList<Tuple> dragonTeam = new LinkedList<Tuple>();
 			char[][] stateBoard = s.getBoard();
-			
-			for (int x = 0; x < 5; x++){
-				for(int y = 0; y < 5; y++){
+
+			for (int x = 0; x < 5; x++) {
+				for (int y = 0; y < 5; y++) {
 					char curPiece = stateBoard[x][y];
-					if (curPiece == 'K'){
-						kingTeam.addFirst(new Tuple(x,y));
-					} else if (curPiece == 'G'){
-						kingTeam.addLast(new Tuple(x,y));
-					} else if (curPiece == 'D'){
-						dragonTeam.add(new Tuple(x,y));
+					if (curPiece == 'K') {
+						kingTeam.addFirst(new Tuple(x, y));
+					} else if (curPiece == 'G') {
+						kingTeam.addLast(new Tuple(x, y));
+					} else if (curPiece == 'D') {
+						dragonTeam.add(new Tuple(x, y));
 					}
 				}
 			}
 			int returnValue = 0;
-			
-			//calculates the value of the dragons
-			if(dragonTeam.size() < 4){
+
+			// calculates the value of the dragons
+			if (dragonTeam.size() < 4) {
 				returnValue += -50;
-			} else if (dragonTeam.size() == 4){
+			} else if (dragonTeam.size() == 4) {
 				returnValue += -25;
 			} else {
 				returnValue += (10 * (dragonTeam.size()));
 			}
-			
-			//calculates the value based on kings position relative to his goal
+
+			// calculates the value based on kings position relative to his goal
 			Tuple kingPosition = kingTeam.getFirst();
-			returnValue += Math.negateExact((int) (Math.pow((kingPosition.getX()+1),4)));
-			
-			//calculates the value based on number of guards
-			switch(kingTeam.size() - 1){
-				case(0):
-					returnValue += 100;
-					break;
-				case(1):
-					returnValue += 40;
-					break;
-				case(2):
-					returnValue += 15;
-					break;
-				default:
-					break;
+			returnValue += Math.negateExact((int) (Math.pow((kingPosition.getX() + 1), 4)));
+
+			// calculates the value based on number of guards
+			switch (kingTeam.size() - 1) {
+			case (0):
+				returnValue += 100;
+				break;
+			case (1):
+				returnValue += 40;
+				break;
+			case (2):
+				returnValue += 15;
+				break;
+			default:
+				break;
 			}
-			
-			//calculates the value based on dragons position relative to kings
+
+			// calculates the value based on dragons position relative to kings
 			int numberOfSurroundingDragons = getNumSurroundingDragons(kingPosition, s.getBoard());
-			
-			switch(numberOfSurroundingDragons){
-			case(2):
+
+			switch (numberOfSurroundingDragons) {
+			case (2):
 				returnValue += 300;
 				break;
-			case(1):
+			case (1):
 				returnValue += 50;
 				break;
 			default:
 				break;
 			}
-			
-			//calculating negative points based on how far away the dragons are from the king
-			for (Tuple dragon : dragonTeam){
-				int distance = Math.abs(dragon.getX() - kingPosition.getX()) + Math.abs(dragon.getY() - kingPosition.getY());
+
+			// calculating negative points based on how far away the dragons are
+			// from the king
+			for (Tuple dragon : dragonTeam) {
+				int distance = Math.abs(dragon.getX() - kingPosition.getX())
+						+ Math.abs(dragon.getY() - kingPosition.getY());
 				returnValue -= (distance * 2);
 			}
-			
+
 			System.out.println(returnValue);
 			return returnValue;
 		}
 	}
-	
-	private int getNumSurroundingDragons(Tuple kingPosition, char[][] gameBoard){
-		int x = kingPosition.getX();
-		int y = kingPosition.getY();
+
+	/**
+	 * Get the number of dragons surrounding a piece at piecePosition. Per the
+	 * game rules, a piece can only be "surrounded" horizontally or vertically
+	 * NOT diagonally.
+	 * 
+	 * @param piecePosition
+	 *            The coordinates of the piece to check
+	 * @param gameBoard
+	 *            The board to check for dragons
+	 * 
+	 * @return integer between 0 and 4 indicating number of dragons surrounding
+	 *         the piece at piecePosition
+	 */
+	private int getNumSurroundingDragons(Tuple piecePosition, char[][] gameBoard) {
+		int x = piecePosition.getX();
+		int y = piecePosition.getY();
 		int numToReturn = 0;
-		
-		boolean checkBottom = ((x+1) <= 4);
-		boolean checkTop = ((x-1) >= 0);
-		boolean checkLeft = ((y-1) >= 0);
-		boolean checkRight = ((y+1) <= 4);
-		
-		if (checkBottom && gameBoard[x+1][y] == 'D') {
+
+		boolean checkBottom = ((x + 1) <= 4);
+		boolean checkTop = ((x - 1) >= 0);
+		boolean checkLeft = ((y - 1) >= 0);
+		boolean checkRight = ((y + 1) <= 4);
+
+		if (checkBottom && gameBoard[x + 1][y] == 'D') {
 			numToReturn++;
 		}
-		
-		if (checkTop && gameBoard[x-1][y] == 'D') {
+
+		if (checkTop && gameBoard[x - 1][y] == 'D') {
 			numToReturn++;
 		}
-		
-		if (checkRight && gameBoard[x][y+1] == 'D') {
+
+		if (checkRight && gameBoard[x][y + 1] == 'D') {
 			numToReturn++;
 		}
-		
-		if (checkLeft && gameBoard[x][y-1] == 'D') {
+
+		if (checkLeft && gameBoard[x][y - 1] == 'D') {
 			numToReturn++;
 		}
-		
+
 		return numToReturn;
 	}
 
 	/**
-	 * check if the dragon at the provided x,y position can be captured
+	 * Get the number of guards (including king) surrounding a piece at position
+	 * x,y. Per the game rules, a piece can only be "surrounded" horizontally or
+	 * vertically NOT diagonally.
 	 * 
-	 * @return true if surrounded by at least 2 guards (king counted as a
-	 *         "guard"), false otherwise.
+	 * @param x
+	 *            The coordinates of the piece to check
+	 * @param y
+	 *            The coordinates of the piece to check
+	 * 
+	 * @return integer between 0 and 4 indicating number of guards (including
+	 *         king) surrounding piece at x,y
 	 */
-	private boolean canCaptureDragon(int x, int y) {
+	private int getNumSurroundingGuards(int x, int y) {
 		int numGuards = 0;
 
 		if (isKingOrGuard(x - 1, y)) {
@@ -402,23 +463,7 @@ public class Board {
 			numGuards++;
 		}
 
-		// Uncomment to allow diagonal captures
-		/*
-		 * if (isKingOrGuard(x-1,y-1)) { numGuards++; }
-		 * 
-		 * if (isKingOrGuard(x+1,y+1)) { numGuards++; }
-		 * 
-		 * if (isKingOrGuard(x-1,y+1)) { numGuards++; }
-		 * 
-		 * if (isKingOrGuard(x+1,y-1)) { numGuards++; }
-		 */
-
-		// Make the final decision if the dragon is able to be captured
-		if (numGuards >= 2) {
-			return true;
-		} else {
-			return false;
-		}
+		return numGuards;
 	}
 
 	/**
@@ -487,7 +532,7 @@ public class Board {
 	private boolean checkPiece(int x, int y, char letter) {
 		if ((x < 0) || (x > 4) || (y < 0) || (y > 4))
 			return false;
-		if (gameBoard.getChar(x, y) == letter) {
+		if (actualGameState.getChar(x, y) == letter) {
 			return true;
 		} else {
 			return false;
@@ -500,8 +545,8 @@ public class Board {
 	 * @return true if the king is surrounded by at least 3 dragons in
 	 *         horizontal/vertical directions, false otherwise.
 	 */
-	public boolean dragonsWin() {
-		return surroundedByDragons(king.getPosition().getX(), king.getPosition().getY()) >= 3;
+	protected boolean dragonsWin(Tuple kingPosition, char[][] gameBoard) {
+		return getNumSurroundingDragons(kingPosition, gameBoard) >= 3;
 	}
 
 	/**
@@ -509,8 +554,8 @@ public class Board {
 	 * 
 	 * @return true if the king is at the dragon's "home row", false otherwise.
 	 */
-	public boolean kingWins() {
-		if (king.getPosition().getX() == 4) {
+	protected boolean kingWins(Tuple kingPosition) {
+		if (kingPosition.getX() == 4) {
 			return true;
 		} else {
 			return false;
@@ -520,7 +565,7 @@ public class Board {
 	/**
 	 * check if any guards have been captured
 	 */
-	public void checkGuardCapture() {
+	protected void checkGuardCapture() {
 		LinkedList<gamePiece> killList = new LinkedList<gamePiece>();
 		for (gamePiece currentPiece : teamOne) {
 			// Only consider alive guards
@@ -533,26 +578,26 @@ public class Board {
 
 			// If guard is surrounded by at least 3 dragons, the guard dies and
 			// is replaced with a dragon
-			if (surroundedByDragons(currentPiece.getPosition().getX(), currentPiece.getPosition().getY()) >= 3) {
+			if (getNumSurroundingDragons(currentPiece.getPosition(), Board.actualGameState.getBoard()) >= 3) {
 				Dragon newDragon = new Dragon(x, y);
 				teamTwo.add(newDragon);
 				currentPiece.kill();
 				killList.add(currentPiece);
-				
+
 				// For now, deciding not to remove dead pieces from teamOne's
 				// list. Uncomment line below if this is an issue
 				// teamOne.remove(currentPiece);
 
 				// The dragon must be replacing a guard, otherwise there is a
 				// serious problem
-				gameBoard.setChar(x, y, 'D');
+				actualGameState.setChar(x, y, 'D');
 			}
 		}
-		
-		while(!killList.isEmpty()){
+
+		while (!killList.isEmpty()) {
 			teamOne.remove(killList.removeFirst());
 		}
-		
+
 	}
 
 	/**
@@ -561,98 +606,54 @@ public class Board {
 	 * 
 	 * Returns true on success, false otherwise
 	 */
-	public boolean killDragon(int x, int y) {
+	protected boolean killDragon(int x, int y) {
 		// Note, we might have to make this better. Finds the object which
 		// represents the piece we are killing
 		for (gamePiece pieceToCheck : teamTwo) {
 			if (pieceToCheck.checkPosition(new Tuple(x, y))) {
 				pieceToCheck.kill();
-				teamTwo.remove(pieceToCheck); //Note: this might break stuff.
+				teamTwo.remove(pieceToCheck); // Note: this might break stuff.
 				return true;
 			}
 		}
 		return false;
 	}
 
-	/**
-	 * check if the current piece is surrounded by at least 3 dragons. Per the
-	 * game rules, a piece can only be "surrounded" horizontally or vertically
-	 * NOT diagonally.
-	 * 
-	 * @return true if surrounded by at least 3 dragons, false otherwise.
-	 */
-
-	private int surroundedByDragons(int x, int y) {
-		int numDragons = 0;
-
-		if (isDragon(x - 1, y)) {
-			numDragons++;
-		}
-
-		if (isDragon(x, y - 1)) {
-			numDragons++;
-		}
-
-		if (isDragon(x + 1, y)) {
-			numDragons++;
-		}
-
-		if (isDragon(x, y + 1)) {
-			numDragons++;
-		}
-
-		// Uncomment to allow diagonal surroundings
-
-		/*
-		 * if (isDragon(x-1,y-1)) { numDragons++; }
-		 * 
-		 * if (isDragon(x+1,y+1)) { numDragons++; }
-		 * 
-		 * if (isDragon(x-1,y+1)) { numDragons++; }
-		 * 
-		 * if (isDragon(x+1,y-1)) { numDragons++; }
-		 */
-
-		// Make the final decision if the piece was captured by a dragon
-		return numDragons;
-	}
-
-	
-	public void applyState(State s){
-		gameBoard = s;
+	protected void applyState(State s) {
+		actualGameState = s.clone();
 		LinkedList<Tuple> t1 = new LinkedList<Tuple>();
 		LinkedList<Tuple> t2 = new LinkedList<Tuple>();
 		char[][] stateBoard = s.getBoard();
-		
-		for (int x = 0; x < 5; x++){
-			for(int y = 0; y < 5; y++){
+
+		for (int x = 0; x < 5; x++) {
+			for (int y = 0; y < 5; y++) {
 				char curPiece = stateBoard[x][y];
-				if (curPiece == 'K'){
-					t1.addFirst(new Tuple(x,y));
-				} else if (curPiece == 'G'){
-					t1.addLast(new Tuple(x,y));
-				} else if (curPiece == 'D'){
-					t2.add(new Tuple(x,y));
+				if (curPiece == 'K') {
+					t1.addFirst(new Tuple(x, y));
+				} else if (curPiece == 'G') {
+					t1.addLast(new Tuple(x, y));
+				} else if (curPiece == 'D') {
+					t2.add(new Tuple(x, y));
 				}
 			}
 		}
-		
+
 		ArrayList<gamePiece> team;
-		if(s.dragonsJustMoved()){
+		if (s.dragonsJustMoved()) {
 			team = teamTwo;
-	
+
 		} else {
 			team = teamOne;
 		}
-		
-		for(gamePiece curPiece : team){
-			if (curPiece.checkPosition(s.oldPosition)){
+
+		for (gamePiece curPiece : team) {
+			if (curPiece.checkPosition(s.oldPosition)) {
 				curPiece.changePosition(s.newPosition);
 			}
 		}
-		
+
 	}
-	
+
 	/**
 	 * method used for testing purposes hopefully.
 	 * 

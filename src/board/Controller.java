@@ -13,11 +13,18 @@ import search.Minimax;
 
 public class Controller {
 
-	/** we never want to make a duplicate copy of this class. */
-	private Controller() {}
+	/**
+	 * A hard-coded turn limit - a "turn" is considered one move by dragons and
+	 * one move by kings
+	 */
+	final private int turnLimit = 25;
 
-	/** an instance of the game board */
-	public Board myBoard = new Board();
+	/** we never want to make a duplicate copy of this class. */
+	private Controller() {
+	}
+
+	/** an instance of the game board, we only ever want one */
+	private Board myBoard = new Board();
 
 	/** a scanner created to handle user input */
 	private Scanner myScanner = new Scanner(System.in);
@@ -34,8 +41,8 @@ public class Controller {
 		int yCoordinate;
 		char pieceToMove;
 		ArrayList<Tuple> moveList;
-		
-		//The input pattern.
+
+		// The input pattern.
 		Pattern whichPiece = Pattern.compile("[0-4] [0-4]");
 
 		// Step one: check if the game is a draw or can be continued.
@@ -47,20 +54,21 @@ public class Controller {
 		// Step three: list the units that the player has control over
 		printUnitList(myUnits);
 
-
 		// Step four: ask the player for which piece they would like to move.
-		// this bit of code stops the user from entering invalid input and crashing the program
+		// this bit of code stops the user from entering invalid input and
+		// crashing the program
 		System.out.println("Enter the x and y coordinates of the unit you would like to move, separated by a space");
 		String input = myScanner.nextLine();
 		Matcher userInput = whichPiece.matcher(input);
 
-		while (!userInput.matches()){
-			System.out.println("Enter the x and y coordinates of the unit you would like to move, separated by a space");
+		while (!userInput.matches()) {
+			System.out
+					.println("Enter the x and y coordinates of the unit you would like to move, separated by a space");
 			System.out.println("\tExample: 0 0");
 			input = myScanner.nextLine();
 			userInput = whichPiece.matcher(input);
 		}
-		
+
 		xCoordinate = Character.getNumericValue(input.charAt(0));
 		yCoordinate = Character.getNumericValue(input.charAt(2));
 
@@ -96,13 +104,14 @@ public class Controller {
 			input = myScanner.nextLine();
 			userInput = whichPiece.matcher(input);
 
-			while (!userInput.matches()){
-				System.out.println("Enter the x and y coordinates of the unit you would like to move, separated by a space");
+			while (!userInput.matches()) {
+				System.out.println(
+						"Enter the x and y coordinates of the unit you would like to move, separated by a space");
 				System.out.println("\tExample: 0 0");
 				input = myScanner.nextLine();
 				userInput = whichPiece.matcher(input);
 			}
-			
+
 			xCoordinate = Character.getNumericValue(input.charAt(0));
 			yCoordinate = Character.getNumericValue(input.charAt(2));
 		}
@@ -126,10 +135,10 @@ public class Controller {
 		int yCoordinate;
 		char pieceToMove;
 		ArrayList<Tuple> moveList;
-		
-		//The input pattern.
+
+		// The input pattern.
 		Pattern whichPiece = Pattern.compile("[0-4] [0-4]");
-		
+
 		// Step one: Check if the game is a draw or can be continued.
 		isDraw(myUnits);
 
@@ -140,18 +149,20 @@ public class Controller {
 		printUnitList(myUnits);
 
 		// Step four: ask the player for which piece they would like to move.
-		// this bit of code stops the user from entering invalid input and crashing the program
+		// this bit of code stops the user from entering invalid input and
+		// crashing the program
 		System.out.println("Enter the x and y coordinates of the unit you would like to move, separated by a space");
 		String input = myScanner.nextLine();
 		Matcher userInput = whichPiece.matcher(input);
 
-		while (!userInput.matches()){
-			System.out.println("Enter the x and y coordinates of the unit you would like to move, separated by a space");
+		while (!userInput.matches()) {
+			System.out
+					.println("Enter the x and y coordinates of the unit you would like to move, separated by a space");
 			System.out.println("\tExample: 0 0");
 			input = myScanner.nextLine();
 			userInput = whichPiece.matcher(input);
 		}
-		
+
 		xCoordinate = Character.getNumericValue(input.charAt(0));
 		yCoordinate = Character.getNumericValue(input.charAt(2));
 
@@ -176,13 +187,14 @@ public class Controller {
 			input = myScanner.nextLine();
 			userInput = whichPiece.matcher(input);
 
-			while (!userInput.matches()){
-				System.out.println("Enter the x and y coordinates of the unit you would like to move, separated by a space");
+			while (!userInput.matches()) {
+				System.out.println(
+						"Enter the x and y coordinates of the unit you would like to move, separated by a space");
 				System.out.println("\tExample: 0 0");
 				input = myScanner.nextLine();
 				userInput = whichPiece.matcher(input);
 			}
-			
+
 			xCoordinate = Character.getNumericValue(input.charAt(0));
 			yCoordinate = Character.getNumericValue(input.charAt(2));
 		}
@@ -193,49 +205,66 @@ public class Controller {
 
 		return false;
 	}
-
-	// Helper functions to make the player turns.
-	// Assuming that x and y coordinates passed in are always valid
+	
+	/**
+	 * Helper function which executes moves when it is a player's turn
+	 * @param listOfUnits The list of the player's units
+	 * @param moveList   The list of possible moves at xCoordinate, yCoordinate
+	 * @param xCoordinate The current x position of the unit to be moved
+	 * @param yCoordinate The current y position of the unit to be moved
+	 * @param piece The letter of the piece being moved
+	 * 
+	 * Assumes that the x and y coordinates passed in are always valid
+	 */
 	private void moveUnit(ArrayList<gamePiece> listOfUnits, ArrayList<Tuple> moveList, int xCoordinate, int yCoordinate,
 			char piece) {
-		
-		//The input pattern. Since there is already range error checking,
-		//this will just make sure that the input isn't going to simply
-		//crash the program.
+
+		// The input pattern. Since there is already range error checking,
+		// this will just make sure that the input isn't going to simply
+		// crash the program.
 		Pattern whichSpot = Pattern.compile("\\d{1}");
 		String input;
 		Matcher userInput;
-		
+
 		int index = -1;
-		
+
 		while ((index < 0) || (index >= moveList.size())) {
-			do{
+			do {
 				System.out.println("Here are the legal moves: " + moveList);
 				System.out.println("Enter the index of the move you would like to make (starting from 0!)");
 				input = myScanner.nextLine();
 				userInput = whichSpot.matcher(input);
-			}while (!userInput.matches());
+			} while (!userInput.matches());
 			index = Integer.parseInt(input);
 		}
 		Tuple nextMove = moveList.get(index);
 		gamePiece pieceToMove = null;
-		
-		// Note, we might have to make this better. Finds the object which represents the piece we are moving
+
+		// Note, we might have to make this better. Finds the object which
+		// represents the piece we are moving
 		for (gamePiece pieceToCheck : listOfUnits) {
 			if (pieceToCheck.checkPosition(new Tuple(xCoordinate, yCoordinate))) {
 				pieceToMove = pieceToCheck;
 			}
 		}
-		
+
 		// Piece capture move (king or guard is capturing dragon) if appropriate
-		if (Board.gameBoard.getChar(nextMove.getX(), nextMove.getY()) == 'D') {
+		if (Board.actualGameState.getChar(nextMove.getX(), nextMove.getY()) == 'D') {
 			myBoard.killDragon(nextMove.getX(), nextMove.getY());
 		}
-		
+
 		// Simple move to unoccupied space, overwrites D if dragon was killed
 		pieceToMove.changePosition(nextMove);
 	}
 
+	/**
+	 * Checks if the current game is a draw, i.e. all the pieces of the current
+	 * player have no available moves
+	 * 
+	 * @param listToCheck
+	 *            List of pieces to check
+	 * @return True if the game is a draw, false otherwise
+	 */
 	private boolean isDraw(ArrayList<gamePiece> listToCheck) {
 		for (gamePiece currentPiece : listToCheck) {
 			Tuple currentTuple = currentPiece.getPosition();
@@ -246,6 +275,12 @@ public class Controller {
 		return true;
 	}
 
+	/**
+	 * Prints all of a team's units to the console in a readable way
+	 * 
+	 * @param listToPrint
+	 *            List of pieces to print
+	 */
 	private void printUnitList(ArrayList<gamePiece> listToPrint) {
 		for (gamePiece currentPiece : listToPrint) {
 			if (currentPiece.isAlive()) {
@@ -253,61 +288,61 @@ public class Controller {
 			}
 		}
 	}
-	
+
 	/**
-	 * Called to execute the computer's turn using the alphabeta algorithm
+	 * Called to execute the computer's turn using the alpha-beta algorithm
 	 * 
-	 * @param AI The initialized AlphaBeta instance
-	 * @param AIisDragon True if the AI is playing as Dragons, false otherwise
+	 * @param AI
+	 *            The initialized AlphaBeta instance
+	 * @param AIisDragon
+	 *            True if the AI is playing as Dragons, false otherwise
 	 * 
 	 * @return true if the game is in a draw state, false otherwise.
 	 */
-	private boolean playAlphaBetaTurn(AlphaBeta AI, boolean AIisDragon){
-		//Step zero: print board
+	private boolean playAlphaBetaTurn(AlphaBeta AI, boolean AIisDragon) {
+		// Step zero: print board
 		myBoard.printGameBoard();
-		
-		//Step one: perform alpha-beta search
-		GameNode n = AI.reformedAlphaBeta(new GameNode(new State(Board.gameBoard.getBoard()), 0, 0),
+
+		// Step one: perform alpha-beta search
+		GameNode n = AI.reformedAlphaBeta(new GameNode(new State(Board.actualGameState.getBoard()), 0, 0),
 				Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY, AIisDragon);
-		
-		//Step two: apply the chosen state to our board.
+
+		// Step two: apply the chosen state to our board.
 		myBoard.applyState(n.getState());
-		
-		//Step Three: Determine if the move resulted in a draw
-		if(n.getValue() == 0){
+
+		// Step Three: Determine if the move resulted in a draw
+		if (n.getValue() == 0) {
 			return true;
-		}
-		else
-		{
+		} else {
 			return false;
 		}
 	}
-	
+
 	/**
 	 * Called to execute the computer's turn using the minimax algorithm
 	 * 
-	 * @param AI The initialized Minimax instance
-	 * @param AIisDragon True if the AI is playing as Dragons, false otherwise
+	 * @param AI
+	 *            The initialized Minimax instance
+	 * @param AIisDragon
+	 *            True if the AI is playing as Dragons, false otherwise
 	 * 
 	 * @return true if the game is in a draw state, false otherwise.
 	 */
 	@SuppressWarnings("unused")
-	private boolean playMinimaxTurn(Minimax AI){
-		//Step zero: print board
+	private boolean playMinimaxTurn(Minimax AI) {
+		// Step zero: print board
 		myBoard.printGameBoard();
 
-		//Step one: perform minimax search
-		GameNode n = AI.MinimaxValue(new GameNode(new State(Board.gameBoard.getBoard()), 0, 0), true);
-		
-		//Step two: apply the chosen state to our board.
+		// Step one: perform minimax search
+		GameNode n = AI.MinimaxValue(new GameNode(new State(Board.actualGameState.getBoard()), 0, 0), true);
+
+		// Step two: apply the chosen state to our board.
 		myBoard.applyState(n.getState());
-		
-		//Step Three: Determine if the move resulted in a draw
-		if(n.getValue() == 0){
+
+		// Step Three: Determine if the move resulted in a draw
+		if (n.getValue() == 0) {
 			return true;
-		}
-		else
-		{
+		} else {
 			return false;
 		}
 	}
@@ -318,33 +353,34 @@ public class Controller {
 	public void game() {
 		boolean draw = false;
 		boolean dragonsWin = false;
-		
+
 		System.out.println("~~~~~~~~~~~~~~~");
 		System.out.println("~THE MAD KING!~");
 		System.out.println("~~~~~~~~~~~~~~~");
-		
+
 		/* Initialize the AI */
-		//Minimax AI = new Minimax(myBoard);
+		// Minimax AI = new Minimax(myBoard);
 		AlphaBeta AI = new AlphaBeta(myBoard);
-		
+
 		/* Let the player pick a team, AI will be the other team */
 		Pattern whichTeam = Pattern.compile("[DK]");
 		System.out.print("Please enter 'D' to play as dragons or 'K' to play as the Mad King: ");
 		String input = myScanner.nextLine();
 		Matcher userInput = whichTeam.matcher(input);
 
-		while (!userInput.matches()){
+		while (!userInput.matches()) {
 			System.out.print("Please enter 'D' to play as dragons or 'K' to play as the Mad King: ");
 			input = myScanner.nextLine();
 			userInput = whichTeam.matcher(input);
 		}
-		
+
 		// Set team value based on user input
 		char playerTeam = input.charAt(0);
 
 		/* Primary Game Loop */
-		while (true) {
-			
+		int moves = 0;
+		for (; moves < turnLimit; moves++) {
+
 			// Dragons always move first
 			if (playerTeam == 'D') {
 				if (playerDragonTurn()) {
@@ -352,22 +388,28 @@ public class Controller {
 					break;
 				}
 			} else {
-				if (playAlphaBetaTurn(AI,true)) {
+				if (playAlphaBetaTurn(AI, true)) {
 					draw = true;
 					break;
 				}
 			}
-			
-			// Do post-move checks to see if the game is over or if pieces need to be captured
+
+			// Do post-move checks to see if the game is over or if pieces need
+			// to be captured
 			myBoard.checkGuardCapture();
-			if (myBoard.dragonsWin()) {
+			if (myBoard.dragonsWin(myBoard.getKing().getPosition(), Board.actualGameState.getBoard())) {
 				dragonsWin = true;
 				break;
 			}
-			if (myBoard.kingWins()) {
+			if (myBoard.kingWins(myBoard.getKing().getPosition())) {
 				break;
 			}
-			
+			/*
+			 * Flips boolean in game state to indicate the other team will be
+			 * moving now
+			 */
+			Board.actualGameState.nextTurn();
+
 			// King always move second
 			if (playerTeam == 'K') {
 				if (playerKingTurn()) {
@@ -375,24 +417,39 @@ public class Controller {
 					break;
 				}
 			} else {
-				if (playAlphaBetaTurn(AI,false)) {
+				if (playAlphaBetaTurn(AI, false)) {
 					draw = true;
 					break;
 				}
 			}
-			
-			// Do post-move checks to see if the game is over or if pieces need to be captured
+
+			// Do post-move checks to see if the game is over or if pieces need
+			// to be captured
 			myBoard.checkGuardCapture();
-			if (myBoard.dragonsWin()) {
+			if (myBoard.dragonsWin(myBoard.getKing().getPosition(), Board.actualGameState.getBoard())) {
 				dragonsWin = true;
 				break;
 			}
-			if (myBoard.kingWins()) {
+			if (myBoard.kingWins(myBoard.getKing().getPosition())) {
 				break;
 			}
-			
+
+			/*
+			 * Flips boolean in game state to indicate the other team will be
+			 * moving now
+			 */
+			Board.actualGameState.nextTurn();
+
 		}
-		
+
+		/*
+		 * If the primary loop above exited because we exceeded 50 moves, the
+		 * game is a draw
+		 */
+		if (moves >= turnLimit) {
+			draw = true;
+		}
+
 		/* Print result of game */
 		System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
 		myBoard.printGameBoard();

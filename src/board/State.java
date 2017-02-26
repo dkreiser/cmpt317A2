@@ -17,9 +17,9 @@ public class State {
 		potentialBoardWins = false;
 	}
 	
-	// Constructor, used for cloning
+	// Constructor, used for deep cloning
 	public State(char[][] newBoard, boolean djm, boolean pbw, Tuple oldPos, Tuple newPos){
-		potentialBoard = newBoard;
+		potentialBoard = newBoard.clone();
 		dragonsJustMoved = djm;
 		potentialBoardWins = pbw;
 		if(oldPos != null){
@@ -80,6 +80,10 @@ public class State {
 	
 	public boolean dragonsJustMoved() {
 		return dragonsJustMoved;
+	}
+	
+	public void nextTurn() {
+		dragonsJustMoved = !dragonsJustMoved;
 	}
 
 	public boolean potentialBoardWins() {
