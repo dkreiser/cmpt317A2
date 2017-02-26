@@ -23,11 +23,11 @@ public class Controller {
 	private Scanner myScanner = new Scanner(System.in);
 
 	/**
-	 * instructions to make player ones turn.
+	 * Called when the human player is playing as King to execute their turn
 	 * 
 	 * @return true if the game is in a draw state, false otherwise.
 	 */
-	private boolean playerOneTurn() {
+	private boolean playerKingTurn() {
 		// variables used
 		ArrayList<gamePiece> myUnits = myBoard.getTeamOne();
 		int xCoordinate;
@@ -115,12 +115,11 @@ public class Controller {
 	}
 
 	/**
-	 * instructions to make player twos turn.
+	 * Called when the human player is playing as dragons to execute their turn
 	 * 
 	 * @return true if the game is in a draw state, false otherwise.
 	 */
-	@SuppressWarnings("unused")
-	private boolean playerTwoTurn() {
+	private boolean playerDragonTurn() {
 		// variables used
 		ArrayList<gamePiece> myUnits = myBoard.getTeamTwo();
 		int xCoordinate;
@@ -255,18 +254,26 @@ public class Controller {
 		}
 	}
 	
-	private boolean playAlphaBetaTurn(AlphaBeta AI){
+	/**
+	 * Called to execute the computer's turn using the alphabeta algorithm
+	 * 
+	 * @param AI The initialized AlphaBeta instance
+	 * @param AIisDragon True if the AI is playing as Dragons, false otherwise
+	 * 
+	 * @return true if the game is in a draw state, false otherwise.
+	 */
+	private boolean playAlphaBetaTurn(AlphaBeta AI, boolean AIisDragon){
 		//Step zero: print board
 		myBoard.printGameBoard();
 		
-		//Step one: call alphabeta value
+		//Step one: perform alpha-beta search
 		GameNode n = AI.reformedAlphaBeta(new GameNode(new State(Board.gameBoard.getBoard()), 0, 0),
-				Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY, true);
+				Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY, AIisDragon);
 		
-		//Step two: apply the state to our board.
+		//Step two: apply the chosen state to our board.
 		myBoard.applyState(n.getState());
 		
-		//Step Three: Check draw
+		//Step Three: Determine if the move resulted in a draw
 		if(n.getValue() == 0){
 			return true;
 		}
@@ -276,18 +283,26 @@ public class Controller {
 		}
 	}
 	
+	/**
+	 * Called to execute the computer's turn using the minimax algorithm
+	 * 
+	 * @param AI The initialized Minimax instance
+	 * @param AIisDragon True if the AI is playing as Dragons, false otherwise
+	 * 
+	 * @return true if the game is in a draw state, false otherwise.
+	 */
 	@SuppressWarnings("unused")
 	private boolean playMinimaxTurn(Minimax AI){
 		//Step zero: print board
 		myBoard.printGameBoard();
 
-		//Step one: call minimax value
+		//Step one: perform minimax search
 		GameNode n = AI.MinimaxValue(new GameNode(new State(Board.gameBoard.getBoard()), 0, 0), true);
 		
-		//Step two: apply the state to our board.
+		//Step two: apply the chosen state to our board.
 		myBoard.applyState(n.getState());
 		
-		//Step Three:
+		//Step Three: Determine if the move resulted in a draw
 		if(n.getValue() == 0){
 			return true;
 		}
@@ -304,35 +319,81 @@ public class Controller {
 		boolean draw = false;
 		boolean dragonsWin = false;
 		
+		System.out.println("~~~~~~~~~~~~~~~");
+		System.out.println("~THE MAD KING!~");
+		System.out.println("~~~~~~~~~~~~~~~");
+		
+		/* Initialize the AI */
 		//Minimax AI = new Minimax(myBoard);
 		AlphaBeta AI = new AlphaBeta(myBoard);
 		
-		while (true) {
-			if (playAlphaBetaTurn(AI)) {
-				draw = true;
-				break;
-			}
-			myBoard.checkGuardCapture();
-			if (myBoard.dragonsWin()) {
-				dragonsWin = true;
-				break;
-			}
-			if (myBoard.kingWins()) {
-				break;
-			}
-			if (playerOneTurn()) {
-				draw = true;
-				break;
-			}
-			myBoard.checkGuardCapture();
-			if (myBoard.dragonsWin()) {
-				dragonsWin = true;
-				break;
-			}
-			if (myBoard.kingWins()) {
-				break;
-			}
+		/* Let the player pick a team, AI will be the other team */
+		Pattern whichTeam = Pattern.compile("[DK]");
+		System.out.print("Please enter 'D' to play as dragons or 'K' to play as the Mad King: ");
+		String input = myScanner.nextLine();
+		Matcher userInput = whichTeam.matcher(input);
+
+		while (!userInput.matches()){
+			System.out.print("Please enter 'D' to play as dragons or 'K' to play as the Mad King: ");
+			input = myScanner.nextLine();
+			userInput = whichTeam.matcher(input);
 		}
+		
+		// Set team value based on user input
+		char playerTeam = input.charAt(0);
+
+		/* Primary Game Loop */
+		while (true) {
+			
+			// Dragons always move first
+			if (playerTeam == 'D') {
+				if (playerDragonTurn()) {
+					draw = true;
+					break;
+				}
+			} else {
+				if (playAlphaBetaTurn(AI,true)) {
+					draw = true;
+					break;
+				}
+			}
+			
+			// Do post-move checks to see if the game is over or if pieces need to be captured
+			myBoard.checkGuardCapture();
+			if (myBoard.dragonsWin()) {
+				dragonsWin = true;
+				break;
+			}
+			if (myBoard.kingWins()) {
+				break;
+			}
+			
+			// King always move second
+			if (playerTeam == 'K') {
+				if (playerKingTurn()) {
+					draw = true;
+					break;
+				}
+			} else {
+				if (playAlphaBetaTurn(AI,false)) {
+					draw = true;
+					break;
+				}
+			}
+			
+			// Do post-move checks to see if the game is over or if pieces need to be captured
+			myBoard.checkGuardCapture();
+			if (myBoard.dragonsWin()) {
+				dragonsWin = true;
+				break;
+			}
+			if (myBoard.kingWins()) {
+				break;
+			}
+			
+		}
+		
+		/* Print result of game */
 		System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
 		myBoard.printGameBoard();
 		if (draw) {
@@ -351,14 +412,14 @@ public class Controller {
 	}
 
 	/**
-	 * where the game is played from for now.
+	 * where the game is launched from
 	 * 
 	 * @param args
 	 *            not used.
 	 */
 	public static void main(String[] args) {
-		Controller testController = new Controller();
+		Controller gameController = new Controller();
 
-		testController.game();
+		gameController.game();
 	}
 }
