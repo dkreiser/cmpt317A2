@@ -11,77 +11,77 @@ public class State {
 	public Tuple newPosition = null;
 
 	// Initial static board constructor, used once in Board.java
-	public State(char[][] newBoard){
+	public State(char[][] newBoard) {
 		potentialBoard = newBoard;
 		dragonsJustMoved = false;
 		potentialBoardWins = false;
 	}
-	
+
 	// Constructor, used for deep cloning
-	public State(char[][] newBoard, boolean djm, boolean pbw, Tuple oldPos, Tuple newPos){
-		potentialBoard = newBoard.clone();
+	public State(char[][] newBoard, boolean djm, boolean pbw, Tuple oldPos, Tuple newPos) {
+		potentialBoard = newBoard;
 		dragonsJustMoved = djm;
 		potentialBoardWins = pbw;
-		if(oldPos != null){
+		if (oldPos != null) {
 			oldPosition = oldPos.clone();
 		}
-		if(newPos != null){
+		if (newPos != null) {
 			newPosition = newPos.clone();
 		}
 	}
-	
+
 	// Build a new state from a previous state
 	public State(State s) {
-		for (int x = 0; x < 5; x++){
-			for(int y = 0; y < 5; y++){
+		for (int x = 0; x < 5; x++) {
+			for (int y = 0; y < 5; y++) {
 				setChar(x, y, s.getChar(x, y));
 			}
 		}
-		dragonsJustMoved = !s.dragonsJustMoved();
+		dragonsJustMoved = s.dragonsJustMoved();
 		potentialBoardWins = false;
 	}
-	
+
 	// Constructor used in successor function
-	public State(State s, Tuple oldPosition, Tuple newPosition, char letter){
-		for (int x = 0; x < 5; x++){
-			for(int y = 0; y < 5; y++){
+	public State(State s, Tuple oldPosition, Tuple newPosition, char letter) {
+		for (int x = 0; x < 5; x++) {
+			for (int y = 0; y < 5; y++) {
 				setChar(x, y, s.getChar(x, y));
 			}
 		}
 		this.oldPosition = oldPosition;
 		this.newPosition = newPosition;
-		
+
 		// Need to account for dragons being eaten here
 		potentialBoard[oldPosition.getX()][oldPosition.getY()] = '_';
 		potentialBoard[newPosition.getX()][newPosition.getY()] = letter;
 		dragonsJustMoved = !s.dragonsJustMoved();
 		potentialBoardWins = false;
 	}
-	
-	public char[][] getBoard(){
+
+	public char[][] getBoard() {
 		return potentialBoard.clone();
 	}
-	
-	public char getChar(int x, int y){
+
+	public char getChar(int x, int y) {
 		return potentialBoard[x][y];
 	}
-	
-	public char getChar(Tuple x){
+
+	public char getChar(Tuple x) {
 		return potentialBoard[x.getX()][x.getY()];
 	}
-	
-	public void setChar(int x, int y, char newChar){
+
+	public void setChar(int x, int y, char newChar) {
 		potentialBoard[x][y] = newChar;
 	}
-	
-	public void setChar(Tuple x, char newChar){
+
+	public void setChar(Tuple x, char newChar) {
 		potentialBoard[x.getX()][x.getY()] = newChar;
 	}
-	
+
 	public boolean dragonsJustMoved() {
 		return dragonsJustMoved;
 	}
-	
+
 	public void nextTurn() {
 		dragonsJustMoved = !dragonsJustMoved;
 	}
@@ -93,13 +93,13 @@ public class State {
 	public void stateIsWinner() {
 		this.potentialBoardWins = true;
 	}
-	
-	public State clone(){
+
+	public State clone() {
 		char[][] newBoard = this.getBoard();
 		return new State(newBoard, dragonsJustMoved, potentialBoardWins, oldPosition, newPosition);
 	}
-	
-	public String toString(){
+
+	public String toString() {
 		String returnString = "";
 		returnString += "  0 1 2 3 4\n";
 		for (int i = 0; i < 5; i++) {
@@ -109,13 +109,13 @@ public class State {
 			}
 			returnString += "\n";
 		}
-		
+
 		returnString += "Dragons Just Moved: " + dragonsJustMoved;
-		returnString += "\nPotential Board wins: " + 	potentialBoardWins;
+		returnString += "\nPotential Board wins: " + potentialBoardWins;
 		returnString += "\nOld Position is: " + oldPosition;
 		returnString += "\nNew Position is: " + newPosition;
 		returnString += "\n~~~~~~~~~~\n";
-		
+
 		return returnString;
 	}
 }

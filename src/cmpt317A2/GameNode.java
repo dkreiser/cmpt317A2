@@ -7,7 +7,7 @@ public class GameNode {
 	protected State state;
 	protected double value;
 	protected int depth;
-	
+
 	public GameNode(State state, double value, int depth) {
 		this.state = state;
 		this.value = value;
@@ -37,12 +37,12 @@ public class GameNode {
 	public void setDepth(int depth) {
 		this.depth = depth;
 	}
-	
+
 	public GameNode clone() {
 		return new GameNode(state.clone(), value, depth);
 	}
-	
-	public String toString(){
+
+	public String toString() {
 		String returnString = "";
 		returnString += state.toString();
 		returnString += "Value is: " + value;

@@ -16,43 +16,48 @@ public class AlphaBeta {
 		this.gameBoard = b;
 	}
 
-	public GameNode reformedAlphaBeta(GameNode currentNode, double alpha, double beta, boolean startMax){
+	public GameNode reformedAlphaBeta(GameNode currentNode, double alpha, double beta, boolean startMax,
+			boolean AIisDragon) {
 		GameNode bestNode = currentNode.clone();
-		if (currentNode.getDepth() == depthLimit || gameBoard.terminalState(currentNode.getState())){
-			bestNode.setValue(gameBoard.utility(currentNode.getState()));
-		} else if (startMax){
+		if (currentNode.getDepth() == depthLimit || gameBoard.terminalState(currentNode.getState())) {
+			if (AIisDragon) {
+				bestNode.setValue(gameBoard.utility(currentNode.getState()));
+			} else {
+				bestNode.setValue(-1 * gameBoard.utility(currentNode.getState()));
+			}
+		} else if (startMax) {
 			bestNode.setValue(alpha);
-			
+
 			LinkedList<State> successors = gameBoard.successors(currentNode.getState());
 
-			for (State currentState : successors){
+			for (State currentState : successors) {
 				GameNode currNode = new GameNode(currentState, 0, currentNode.getDepth() + 1);
-				GameNode nextNode = reformedAlphaBeta(currNode, bestNode.getValue(), beta, false);
-				
+				GameNode nextNode = reformedAlphaBeta(currNode, bestNode.getValue(), beta, false, AIisDragon);
+
 				Double maximum = Math.max(bestNode.getValue(), nextNode.getValue());
-				
-				if(beta <= maximum){
+
+				if (beta <= maximum) {
 					bestNode = nextNode.clone();
 					break;
 				}
 			}
 		} else {
 			bestNode.setValue(beta);
-			
+
 			LinkedList<State> successors = gameBoard.successors(currentNode.getState());
-			
-			for (State currentState : successors){
+
+			for (State currentState : successors) {
 				GameNode currNode = new GameNode(currentState, 0, currentNode.getDepth() + 1);
-				GameNode nextNode = reformedAlphaBeta(currNode, alpha, bestNode.getValue(), true);
-				
+				GameNode nextNode = reformedAlphaBeta(currNode, alpha, bestNode.getValue(), true, AIisDragon);
+
 				Double minimum = Math.min(bestNode.getValue(), nextNode.getValue());
-				
-				if(minimum <= alpha){
+
+				if (minimum <= alpha) {
 					bestNode = nextNode.clone();
 					break;
 				}
 			}
-		}	
+		}
 		return bestNode;
 	}
 }

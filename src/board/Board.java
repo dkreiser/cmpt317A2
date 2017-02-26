@@ -81,6 +81,7 @@ public class Board {
 			}
 			System.out.println();
 		}
+		System.out.println("Dragons just moved? " + actualGameState.dragonsJustMoved());
 		System.out.println("\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
 	}
 
@@ -109,65 +110,67 @@ public class Board {
 	 *            the x coordinate of the tile we are evaluating
 	 * @param y
 	 *            the y coordinate of the tile we are evaluating
+	 * @param s
+	 *            the state we are evaluating
 	 * @return an arrayList of tuples that contain all of the (x,y) pairs of the
 	 *         valid moves we can make.
 	 */
-	protected ArrayList<Tuple> availableMoves(int x, int y) {
-		char piece = actualGameState.getChar(x, y);
+	protected ArrayList<Tuple> availableMoves(State s, int x, int y) {
+		char piece = s.getChar(x, y);
 		ArrayList<Tuple> returnList = new ArrayList<Tuple>();
 
 		if (piece == '_') {
 			return returnList;
 		}
 
-		if (isLegalMove(x, y + 1)) {
+		if (isLegalMove(s, x, y + 1)) {
 			returnList.add(new Tuple(x, y + 1));
 		}
-		if (isLegalMove(x, y - 1)) {
+		if (isLegalMove(s, x, y - 1)) {
 			returnList.add(new Tuple(x, y - 1));
 		}
-		if (isLegalMove(x + 1, y)) {
+		if (isLegalMove(s, x + 1, y)) {
 			returnList.add(new Tuple(x + 1, y));
 		}
-		if (isLegalMove(x - 1, y)) {
+		if (isLegalMove(s, x - 1, y)) {
 			returnList.add(new Tuple(x - 1, y));
 		}
 
 		switch (piece) {
 		case ('K'): // the king has to additionally check if it can jump a guard
-			if (isGuard(x + 1, y)) {
-				if (isLegalMove(x + 2, y)) {
+			if (isGuard(s, x + 1, y)) {
+				if (isLegalMove(s, x + 2, y)) {
 					returnList.add(new Tuple(x + 2, y));
 				}
 			}
-			if (isGuard(x - 1, y)) {
-				if (isLegalMove(x - 2, y)) {
+			if (isGuard(s, x - 1, y)) {
+				if (isLegalMove(s, x - 2, y)) {
 					returnList.add(new Tuple(x - 2, y));
 				}
 			}
-			if (isGuard(x, y + 1)) {
-				if (isLegalMove(x, y + 2)) {
+			if (isGuard(s, x, y + 1)) {
+				if (isLegalMove(s, x, y + 2)) {
 					returnList.add(new Tuple(x, y + 2));
 				}
 			}
-			if (isGuard(x, y - 1)) {
-				if (isLegalMove(x, y - 2)) {
+			if (isGuard(s, x, y - 1)) {
+				if (isLegalMove(s, x, y - 2)) {
 					returnList.add(new Tuple(x, y - 2));
 				}
 			}
 			break;
 		case ('D'): // the dragons have to additionally check the diagonal
 					// movements
-			if (isLegalMove(x + 1, y + 1)) {
+			if (isLegalMove(s, x + 1, y + 1)) {
 				returnList.add(new Tuple(x + 1, y + 1));
 			}
-			if (isLegalMove(x - 1, y - 1)) {
+			if (isLegalMove(s, x - 1, y - 1)) {
 				returnList.add(new Tuple(x - 1, y - 1));
 			}
-			if (isLegalMove(x + 1, y - 1)) {
+			if (isLegalMove(s, x + 1, y - 1)) {
 				returnList.add(new Tuple(x + 1, y - 1));
 			}
-			if (isLegalMove(x - 1, y + 1)) {
+			if (isLegalMove(s, x - 1, y + 1)) {
 				returnList.add(new Tuple(x - 1, y + 1));
 			}
 			break;
@@ -185,23 +188,23 @@ public class Board {
 			// king or guard is simply 'moving' to a space where there is
 			// already a dragon. Logic to kill the dragon
 			// is implemented elsewhere
-			if (isDragon(x + 1, y)) {
-				if (getNumSurroundingGuards(x + 1, y) >= 2) {
+			if (isDragon(s, x + 1, y)) {
+				if (getNumSurroundingGuards(s, x + 1, y) >= 2) {
 					returnList.add(new Tuple(x + 1, y));
 				}
 			}
-			if (isDragon(x, y + 1)) {
-				if (getNumSurroundingGuards(x, y + 1) >= 2) {
+			if (isDragon(s, x, y + 1)) {
+				if (getNumSurroundingGuards(s, x, y + 1) >= 2) {
 					returnList.add(new Tuple(x, y + 1));
 				}
 			}
-			if (isDragon(x - 1, y)) {
-				if (getNumSurroundingGuards(x - 1, y) >= 2) {
+			if (isDragon(s, x - 1, y)) {
+				if (getNumSurroundingGuards(s, x - 1, y) >= 2) {
 					returnList.add(new Tuple(x - 1, y));
 				}
 			}
-			if (isDragon(x, y - 1)) {
-				if (getNumSurroundingGuards(x, y - 1) >= 2) {
+			if (isDragon(s, x, y - 1)) {
+				if (getNumSurroundingGuards(s, x, y - 1) >= 2) {
 					returnList.add(new Tuple(x, y - 1));
 				}
 			}
@@ -235,7 +238,7 @@ public class Board {
 		// states from the given state
 		for (gamePiece pieceToCheck : currentTeam) {
 			currentPosition = pieceToCheck.getPosition();
-			currentMoves = availableMoves(currentPosition.getX(), currentPosition.getY());
+			currentMoves = availableMoves(s, currentPosition.getX(), currentPosition.getY());
 
 			// Loop over all possible moves for current piece and add their
 			// resulting state to the list
@@ -263,7 +266,7 @@ public class Board {
 		}
 
 		// Check if the dragons or kings have achieved the win state
-		if (dragonsWin(kingPosition, s.getBoard()) || kingWins(kingPosition)) {
+		if (dragonsWin(s, kingPosition) || kingWins(kingPosition)) {
 			// Set the state's win indicator to true
 			s.stateIsWinner();
 			return true;
@@ -363,7 +366,7 @@ public class Board {
 			}
 
 			// calculates the value based on dragons position relative to kings
-			int numberOfSurroundingDragons = getNumSurroundingDragons(kingPosition, s.getBoard());
+			int numberOfSurroundingDragons = getNumSurroundingDragons(s, kingPosition.getX(), kingPosition.getY());
 
 			switch (numberOfSurroundingDragons) {
 			case (2):
@@ -384,7 +387,7 @@ public class Board {
 				returnValue -= (distance * 2);
 			}
 
-			System.out.println(returnValue);
+			// System.out.println(returnValue);
 			return returnValue;
 		}
 	}
@@ -394,37 +397,32 @@ public class Board {
 	 * game rules, a piece can only be "surrounded" horizontally or vertically
 	 * NOT diagonally.
 	 * 
-	 * @param piecePosition
-	 *            The coordinates of the piece to check
-	 * @param gameBoard
-	 *            The board to check for dragons
+	 * @param s
+	 *            the state containing the game board to check
+	 * @param x
+	 *            The coordinates of the piece to check around
+	 * @param y
+	 *            The coordinates of the piece to check around
 	 * 
 	 * @return integer between 0 and 4 indicating number of dragons surrounding
 	 *         the piece at piecePosition
 	 */
-	private int getNumSurroundingDragons(Tuple piecePosition, char[][] gameBoard) {
-		int x = piecePosition.getX();
-		int y = piecePosition.getY();
+	private int getNumSurroundingDragons(State s, int x, int y) {
 		int numToReturn = 0;
 
-		boolean checkBottom = ((x + 1) <= 4);
-		boolean checkTop = ((x - 1) >= 0);
-		boolean checkLeft = ((y - 1) >= 0);
-		boolean checkRight = ((y + 1) <= 4);
-
-		if (checkBottom && gameBoard[x + 1][y] == 'D') {
+		if (isDragon(s, x + 1, y)) {
 			numToReturn++;
 		}
 
-		if (checkTop && gameBoard[x - 1][y] == 'D') {
+		if (isDragon(s, x - 1, y)) {
 			numToReturn++;
 		}
 
-		if (checkRight && gameBoard[x][y + 1] == 'D') {
+		if (isDragon(s, x, y + 1)) {
 			numToReturn++;
 		}
 
-		if (checkLeft && gameBoard[x][y - 1] == 'D') {
+		if (isDragon(s, x, y - 1)) {
 			numToReturn++;
 		}
 
@@ -436,30 +434,32 @@ public class Board {
 	 * x,y. Per the game rules, a piece can only be "surrounded" horizontally or
 	 * vertically NOT diagonally.
 	 * 
+	 * @param s
+	 *            the state containing the game board to check
 	 * @param x
-	 *            The coordinates of the piece to check
+	 *            The coordinates of the piece to check around
 	 * @param y
-	 *            The coordinates of the piece to check
+	 *            The coordinates of the piece to check around
 	 * 
 	 * @return integer between 0 and 4 indicating number of guards (including
 	 *         king) surrounding piece at x,y
 	 */
-	private int getNumSurroundingGuards(int x, int y) {
+	private int getNumSurroundingGuards(State s, int x, int y) {
 		int numGuards = 0;
 
-		if (isKingOrGuard(x - 1, y)) {
+		if (isKingOrGuard(s, x - 1, y)) {
 			numGuards++;
 		}
 
-		if (isKingOrGuard(x, y - 1)) {
+		if (isKingOrGuard(s, x, y - 1)) {
 			numGuards++;
 		}
 
-		if (isKingOrGuard(x + 1, y)) {
+		if (isKingOrGuard(s, x + 1, y)) {
 			numGuards++;
 		}
 
-		if (isKingOrGuard(x, y + 1)) {
+		if (isKingOrGuard(s, x, y + 1)) {
 			numGuards++;
 		}
 
@@ -469,58 +469,68 @@ public class Board {
 	/**
 	 * checks a given tile to see if it is a king or guard
 	 * 
+	 * @param s
+	 *            the state containing the game board to check
 	 * @param x
 	 *            the x coordinate of the tile to check
 	 * @param y
 	 *            the y coordinate of the tile to check
 	 * @return true if the tile contains a 'K' or 'G', false otherwise.
 	 */
-	private boolean isKingOrGuard(int x, int y) {
-		return checkPiece(x, y, 'K') || checkPiece(x, y, 'G');
+	private boolean isKingOrGuard(State s, int x, int y) {
+		return checkPiece(s, x, y, 'K') || checkPiece(s, x, y, 'G');
 	}
 
 	/**
 	 * checks a given tile to see if it is a dragon
 	 * 
+	 * @param s
+	 *            the state containing the game board to check
 	 * @param x
 	 *            the x coordinate of the tile to check
 	 * @param y
 	 *            the y coordinate of the tile to check
 	 * @return true if the tile contains a 'D', false otherwise.
 	 */
-	private boolean isDragon(int x, int y) {
-		return checkPiece(x, y, 'D');
+	private boolean isDragon(State s, int x, int y) {
+		return checkPiece(s, x, y, 'D');
 	}
 
 	/**
 	 * checks a given tile to see if it is a guard
 	 * 
+	 * @param s
+	 *            the state containing the game board to check
 	 * @param x
 	 *            the x coordinate of the tile to check
 	 * @param y
 	 *            the y coordinate of the tile to check
 	 * @return true if the tile contains a 'G', false otherwise.
 	 */
-	private boolean isGuard(int x, int y) {
-		return checkPiece(x, y, 'G');
+	private boolean isGuard(State s, int x, int y) {
+		return checkPiece(s, x, y, 'G');
 	}
 
 	/**
 	 * check a given tile to see if it is empty
 	 * 
+	 * @param s
+	 *            the state containing the game board to check
 	 * @param x
 	 *            the x coordinate of the tile to check
 	 * @param y
 	 *            the y coordinate of the tile to check
 	 * @return true if the tile contains a '_', false otherwise
 	 */
-	private boolean isLegalMove(int x, int y) {
-		return checkPiece(x, y, '_');
+	private boolean isLegalMove(State s, int x, int y) {
+		return checkPiece(s, x, y, '_');
 	}
 
 	/**
 	 * check a given tile to see if it has the required character on it
 	 * 
+	 * @param s
+	 *            the state containing the game board to check
 	 * @param x
 	 *            the x coordinate of the tile to check
 	 * @param y
@@ -529,10 +539,12 @@ public class Board {
 	 *            the letter to check for
 	 * @return true if the tile contains "letter", false otherwise
 	 */
-	private boolean checkPiece(int x, int y, char letter) {
-		if ((x < 0) || (x > 4) || (y < 0) || (y > 4))
+	private boolean checkPiece(State s, int x, int y, char letter) {
+		if ((x < 0) || (x > 4) || (y < 0) || (y > 4)) {
 			return false;
-		if (actualGameState.getChar(x, y) == letter) {
+		}
+
+		if (s.getChar(x, y) == letter) {
 			return true;
 		} else {
 			return false;
@@ -545,8 +557,8 @@ public class Board {
 	 * @return true if the king is surrounded by at least 3 dragons in
 	 *         horizontal/vertical directions, false otherwise.
 	 */
-	protected boolean dragonsWin(Tuple kingPosition, char[][] gameBoard) {
-		return getNumSurroundingDragons(kingPosition, gameBoard) >= 3;
+	protected boolean dragonsWin(State s, Tuple kingPosition) {
+		return getNumSurroundingDragons(s, kingPosition.getX(), kingPosition.getY()) >= 3;
 	}
 
 	/**
@@ -578,7 +590,8 @@ public class Board {
 
 			// If guard is surrounded by at least 3 dragons, the guard dies and
 			// is replaced with a dragon
-			if (getNumSurroundingDragons(currentPiece.getPosition(), Board.actualGameState.getBoard()) >= 3) {
+			if (getNumSurroundingDragons(Board.actualGameState, currentPiece.getPosition().getX(),
+					currentPiece.getPosition().getY()) >= 3) {
 				Dragon newDragon = new Dragon(x, y);
 				teamTwo.add(newDragon);
 				currentPiece.kill();

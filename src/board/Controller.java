@@ -80,7 +80,7 @@ public class Controller {
 						.println("You are moving the King at position: " + "(" + xCoordinate + "," + yCoordinate + ")");
 				// They've selected a valid unit: verify it can move before
 				// preceding.
-				moveList = myBoard.availableMoves(xCoordinate, yCoordinate);
+				moveList = myBoard.availableMoves(Board.actualGameState, xCoordinate, yCoordinate);
 				if (moveList.size() != 0) {
 					break;
 				} else {
@@ -91,7 +91,7 @@ public class Controller {
 						"You are moving the Guard at position: " + "(" + xCoordinate + "," + yCoordinate + ")");
 				// They've selected a valid unit: verify it can move before
 				// preceding.
-				moveList = myBoard.availableMoves(xCoordinate, yCoordinate);
+				moveList = myBoard.availableMoves(Board.actualGameState, xCoordinate, yCoordinate);
 				if (moveList.size() != 0) {
 					break;
 				} else {
@@ -119,6 +119,8 @@ public class Controller {
 		// Step five: ask the player where they would like to move that unit and
 		// then move it.
 		moveUnit(myUnits, moveList, xCoordinate, yCoordinate, pieceToMove);
+
+		Board.actualGameState.nextTurn();
 
 		return false;
 	}
@@ -174,7 +176,7 @@ public class Controller {
 						"You are moving the Dragon at position: " + "(" + xCoordinate + "," + yCoordinate + ")");
 				// They've selected a valid unit: verify it can move before
 				// preceding.
-				moveList = myBoard.availableMoves(xCoordinate, yCoordinate);
+				moveList = myBoard.availableMoves(Board.actualGameState, xCoordinate, yCoordinate);
 				if (moveList.size() != 0) {
 					break;
 				} else {
@@ -203,18 +205,27 @@ public class Controller {
 		// then move it.
 		moveUnit(myUnits, moveList, xCoordinate, yCoordinate, pieceToMove);
 
+		Board.actualGameState.nextTurn();
+
 		return false;
 	}
-	
+
 	/**
 	 * Helper function which executes moves when it is a player's turn
-	 * @param listOfUnits The list of the player's units
-	 * @param moveList   The list of possible moves at xCoordinate, yCoordinate
-	 * @param xCoordinate The current x position of the unit to be moved
-	 * @param yCoordinate The current y position of the unit to be moved
-	 * @param piece The letter of the piece being moved
 	 * 
-	 * Assumes that the x and y coordinates passed in are always valid
+	 * @param listOfUnits
+	 *            The list of the player's units
+	 * @param moveList
+	 *            The list of possible moves at xCoordinate, yCoordinate
+	 * @param xCoordinate
+	 *            The current x position of the unit to be moved
+	 * @param yCoordinate
+	 *            The current y position of the unit to be moved
+	 * @param piece
+	 *            The letter of the piece being moved
+	 * 
+	 *            Assumes that the x and y coordinates passed in are always
+	 *            valid
 	 */
 	private void moveUnit(ArrayList<gamePiece> listOfUnits, ArrayList<Tuple> moveList, int xCoordinate, int yCoordinate,
 			char piece) {
@@ -268,7 +279,7 @@ public class Controller {
 	private boolean isDraw(ArrayList<gamePiece> listToCheck) {
 		for (gamePiece currentPiece : listToCheck) {
 			Tuple currentTuple = currentPiece.getPosition();
-			if (myBoard.availableMoves(currentTuple.getX(), currentTuple.getY()).size() != 0) {
+			if (myBoard.availableMoves(Board.actualGameState, currentTuple.getX(), currentTuple.getY()).size() != 0) {
 				return false;
 			}
 		}
@@ -304,8 +315,8 @@ public class Controller {
 		myBoard.printGameBoard();
 
 		// Step one: perform alpha-beta search
-		GameNode n = AI.reformedAlphaBeta(new GameNode(new State(Board.actualGameState.getBoard()), 0, 0),
-				Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY, AIisDragon);
+		GameNode n = AI.reformedAlphaBeta(new GameNode(new State(Board.actualGameState), 0, 0),
+				Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY, true, AIisDragon);
 
 		// Step two: apply the chosen state to our board.
 		myBoard.applyState(n.getState());
@@ -397,18 +408,13 @@ public class Controller {
 			// Do post-move checks to see if the game is over or if pieces need
 			// to be captured
 			myBoard.checkGuardCapture();
-			if (myBoard.dragonsWin(myBoard.getKing().getPosition(), Board.actualGameState.getBoard())) {
+			if (myBoard.dragonsWin(Board.actualGameState, myBoard.getKing().getPosition())) {
 				dragonsWin = true;
 				break;
 			}
 			if (myBoard.kingWins(myBoard.getKing().getPosition())) {
 				break;
 			}
-			/*
-			 * Flips boolean in game state to indicate the other team will be
-			 * moving now
-			 */
-			Board.actualGameState.nextTurn();
 
 			// King always move second
 			if (playerTeam == 'K') {
@@ -426,19 +432,13 @@ public class Controller {
 			// Do post-move checks to see if the game is over or if pieces need
 			// to be captured
 			myBoard.checkGuardCapture();
-			if (myBoard.dragonsWin(myBoard.getKing().getPosition(), Board.actualGameState.getBoard())) {
+			if (myBoard.dragonsWin(Board.actualGameState, myBoard.getKing().getPosition())) {
 				dragonsWin = true;
 				break;
 			}
 			if (myBoard.kingWins(myBoard.getKing().getPosition())) {
 				break;
 			}
-
-			/*
-			 * Flips boolean in game state to indicate the other team will be
-			 * moving now
-			 */
-			Board.actualGameState.nextTurn();
 
 		}
 
