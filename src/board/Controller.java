@@ -10,6 +10,7 @@ import cmpt317A2.Tuple;
 import gamepiece.gamePiece;
 import search.AlphaBeta;
 import search.Minimax;
+import search.Search;
 
 public class Controller {
 
@@ -303,19 +304,18 @@ public class Controller {
 			}
 		}
 	}
-
+	
 	/**
-	 * Called to execute the computer's turn using the alpha-beta algorithm
+	 * Called to execute the computer's turn using the appropriate AI algorithm
 	 * 
 	 * @param AI
-	 *            The initialized AlphaBeta instance
+	 *            The initialized AI instance
 	 * @param AIisDragon
 	 *            True if the AI is playing as Dragons, false otherwise
 	 * 
 	 * @return true if the game is in a draw state, false otherwise.
 	 */
-	@SuppressWarnings("unused")
-	private boolean playAlphaBetaTurn(AlphaBeta AI, boolean AIisDragon) {
+	private boolean playAITurn(Search AI, boolean AIisDragon) {
 
 		// Check for draw
 		if (AIisDragon && isDraw(myBoard.getTeamTwo())) {
@@ -327,43 +327,20 @@ public class Controller {
 		// Print board
 		myBoard.printGameBoard();
 
-		// Perform alpha-beta search
-		GameNode n = AI.reformedAlphaBeta(new GameNode(new State(Board.actualGameState), 0, 0),
-				Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY, true, AIisDragon);
-
-		// Apply the chosen state to our board.
-		// Note that this flips the dragonsJustMoved boolean in the state
-		// without us having to explicitly call nextTurn()
-		myBoard.applyState(n.getState());
-
-		return false;
-	}
-
-	/**
-	 * Called to execute the computer's turn using the minimax algorithm
-	 * 
-	 * @param AI
-	 *            The initialized Minimax instance
-	 * @param AIisDragon
-	 *            True if the AI is playing as Dragons, false otherwise
-	 * 
-	 * @return true if the game is in a draw state, false otherwise.
-	 */
-	@SuppressWarnings("unused")
-	private boolean playMinimaxTurn(Minimax AI, boolean AIisDragon) {
-		// Check for draw
-		if (AIisDragon && isDraw(myBoard.getTeamTwo())) {
-			return true;
-		} else if ((!AIisDragon) && isDraw(myBoard.getTeamOne())) {
-			return true;
+		// Perform AI search
+		GameNode n = null;
+		
+		if (AlphaBeta.class.isInstance(AI)) {
+			n = ((AlphaBeta)AI).reformedAlphaBeta(new GameNode(Board.actualGameState.clone(), 0, 0), Double.NEGATIVE_INFINITY,
+					Double.POSITIVE_INFINITY, true, AIisDragon);
+		} else if (Minimax.class.isInstance(AI)) {
+			n = ((Minimax)AI).MinimaxValue(new GameNode(Board.actualGameState.clone(), 0, 0), true, AIisDragon);
 		}
-
-		// Print board
-		myBoard.printGameBoard();
-
-		// Perform minimax search
-		GameNode n = AI.MinimaxValue(new GameNode(new State(Board.actualGameState.getBoard()), 0, 0), true);
-
+		
+		if (n == null) {
+			throw new IllegalStateException("The AI method did not return a state!");
+		}
+		
 		// Apply the chosen state to our board.
 		// Note that this flips the dragonsJustMoved boolean in the state
 		// without us having to explicitly call nextTurn()
@@ -382,10 +359,30 @@ public class Controller {
 		System.out.println("~~~~~~~~~~~~~~~");
 		System.out.println("~THE MAD KING!~");
 		System.out.println("~~~~~~~~~~~~~~~");
+		
+		/* Let the player pick alphabeta or minimax */
+		Pattern whichTeam1 = Pattern.compile("[AM]");
+		System.out.print("Please enter 'A' to play with Alpha-Beta AI or 'M' to play with Minimax AI: ");
+		String input1 = myScanner.nextLine();
+		Matcher userInput1 = whichTeam1.matcher(input1);
 
+		while (!userInput1.matches()) {
+			System.out.print("Please enter 'A' to play with Alpha-Beta AI or 'M' to play with Minimax AI: ");
+			input1 = myScanner.nextLine();
+			userInput1 = whichTeam1.matcher(input1);
+		}
+
+		// Set team value based on user input
+		char AIchoice = input1.charAt(0);
+		
 		/* Initialize the AI */
-		Minimax AI = new Minimax(myBoard);
-		//AlphaBeta AI = new AlphaBeta(myBoard);
+		Search AI;
+		
+		if (AIchoice == 'M') {
+			AI = new Minimax(myBoard);
+		} else {
+			AI = new AlphaBeta(myBoard);
+		}
 
 		/* Let the player pick a team, AI will be the other team */
 		Pattern whichTeam = Pattern.compile("[DK]");
@@ -413,7 +410,7 @@ public class Controller {
 					break;
 				}
 			} else {
-				if (playMinimaxTurn(AI, true)) {
+				if (playAITurn(AI, true)) {
 					draw = true;
 					break;
 				}
@@ -437,7 +434,7 @@ public class Controller {
 					break;
 				}
 			} else {
-				if (playMinimaxTurn(AI, false)) {
+				if (playAITurn(AI, false)) {
 					draw = true;
 					break;
 				}

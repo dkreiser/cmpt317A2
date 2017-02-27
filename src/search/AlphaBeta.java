@@ -6,15 +6,11 @@ import board.Board;
 import board.State;
 import cmpt317A2.GameNode;
 
-public class AlphaBeta {
-
-	// Depth limit must be 
-	final int depthLimit = 2;
-
-	private Board gameBoard;
+public class AlphaBeta extends Search {
 
 	public AlphaBeta(Board b) {
 		this.gameBoard = b;
+		this.depthLimit = 4;
 	}
 
 	public GameNode reformedAlphaBeta(GameNode currentNode, double alpha, double beta, boolean startMax,
@@ -28,33 +24,35 @@ public class AlphaBeta {
 				bestNode.setValue(-1 * gameBoard.utility(currentNode.getState()));
 			}
 		} else if (startMax) {
-			bestNode.setValue(alpha);
+			bestNode.setValue(Double.NEGATIVE_INFINITY);
 
 			LinkedList<State> successors = gameBoard.successors(currentNode.getState());
 
 			for (State currentState : successors) {
-				GameNode currNode = new GameNode(currentState, 0, currentNode.getDepth() + 1);
-				GameNode nextNode = reformedAlphaBeta(currNode, bestNode.getValue(), beta, false, AIisDragon);
+				GameNode currNode = new GameNode(currentState.clone(), 0, currentNode.getDepth() + 1);
+				GameNode nextNode = reformedAlphaBeta(currNode, alpha, beta, false, AIisDragon);
 
 				Double maximum = Math.max(bestNode.getValue(), nextNode.getValue());
+				alpha = Math.max(alpha, maximum);
 
-				if (beta <= maximum) {
+				if (beta <= alpha) {
 					bestNode = nextNode.clone();
 					break;
 				}
 			}
 		} else {
-			bestNode.setValue(beta);
+			bestNode.setValue(Double.POSITIVE_INFINITY);
 
 			LinkedList<State> successors = gameBoard.successors(currentNode.getState());
 
 			for (State currentState : successors) {
 				GameNode currNode = new GameNode(currentState, 0, currentNode.getDepth() + 1);
-				GameNode nextNode = reformedAlphaBeta(currNode, alpha, bestNode.getValue(), true, AIisDragon);
+				GameNode nextNode = reformedAlphaBeta(currNode, alpha, beta, true, AIisDragon);
 
 				Double minimum = Math.min(bestNode.getValue(), nextNode.getValue());
+				beta = Math.min(beta, minimum);
 
-				if (minimum <= alpha) {
+				if (beta <= alpha) {
 					bestNode = nextNode.clone();
 					break;
 				}
