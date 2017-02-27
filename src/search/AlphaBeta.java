@@ -8,6 +8,7 @@ import cmpt317A2.GameNode;
 
 public class AlphaBeta {
 
+	// Depth limit must be 
 	final int depthLimit = 2;
 
 	private Board gameBoard;
@@ -19,10 +20,11 @@ public class AlphaBeta {
 	public GameNode reformedAlphaBeta(GameNode currentNode, double alpha, double beta, boolean startMax,
 			boolean AIisDragon) {
 		GameNode bestNode = currentNode.clone();
-		if (currentNode.getDepth() == depthLimit || gameBoard.terminalState(currentNode.getState())) {
+		if ((gameBoard.terminalState(currentNode.getState()) ) || (currentNode.getDepth() == depthLimit)) {
 			if (AIisDragon) {
 				bestNode.setValue(gameBoard.utility(currentNode.getState()));
 			} else {
+				// Might need to do something more appropriate here if AI is playing as king
 				bestNode.setValue(-1 * gameBoard.utility(currentNode.getState()));
 			}
 		} else if (startMax) {

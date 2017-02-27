@@ -10,8 +10,8 @@ import cmpt317A2.GameNode;
 public class Minimax {
 
 	// takes about a minute at 6
-	// mathematically, 7 should take around 10 minutes, and 8 around 5 hours.
-	final int depthLimit = 50;
+	// mathematically 8 should take around 5 hours.
+	final int depthLimit = 4;
 
 	private Board gameBoard;
 

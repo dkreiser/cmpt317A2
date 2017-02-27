@@ -46,7 +46,9 @@ public class Controller {
 		Pattern whichPiece = Pattern.compile("[0-4] [0-4]");
 
 		// Step one: check if the game is a draw or can be continued.
-		isDraw(myUnits);
+		if (isDraw(myUnits)) {
+			return true;
+		}
 
 		// Step two: print the board
 		myBoard.printGameBoard();
@@ -142,7 +144,9 @@ public class Controller {
 		Pattern whichPiece = Pattern.compile("[0-4] [0-4]");
 
 		// Step one: Check if the game is a draw or can be continued.
-		isDraw(myUnits);
+		if (isDraw(myUnits)) {
+			return true;
+		}
 
 		// Step two: print the board.
 		myBoard.printGameBoard();
@@ -310,23 +314,29 @@ public class Controller {
 	 * 
 	 * @return true if the game is in a draw state, false otherwise.
 	 */
+	@SuppressWarnings("unused")
 	private boolean playAlphaBetaTurn(AlphaBeta AI, boolean AIisDragon) {
-		// Step zero: print board
+
+		// Check for draw
+		if (AIisDragon && isDraw(myBoard.getTeamTwo())) {
+			return true;
+		} else if ((!AIisDragon) && isDraw(myBoard.getTeamOne())) {
+			return true;
+		}
+
+		// Print board
 		myBoard.printGameBoard();
 
-		// Step one: perform alpha-beta search
+		// Perform alpha-beta search
 		GameNode n = AI.reformedAlphaBeta(new GameNode(new State(Board.actualGameState), 0, 0),
 				Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY, true, AIisDragon);
 
-		// Step two: apply the chosen state to our board.
+		// Apply the chosen state to our board.
+		// Note that this flips the dragonsJustMoved boolean in the state
+		// without us having to explicitly call nextTurn()
 		myBoard.applyState(n.getState());
 
-		// Step Three: Determine if the move resulted in a draw
-		if (n.getValue() == 0) {
-			return true;
-		} else {
-			return false;
-		}
+		return false;
 	}
 
 	/**
@@ -340,22 +350,26 @@ public class Controller {
 	 * @return true if the game is in a draw state, false otherwise.
 	 */
 	@SuppressWarnings("unused")
-	private boolean playMinimaxTurn(Minimax AI) {
-		// Step zero: print board
+	private boolean playMinimaxTurn(Minimax AI, boolean AIisDragon) {
+		// Check for draw
+		if (AIisDragon && isDraw(myBoard.getTeamTwo())) {
+			return true;
+		} else if ((!AIisDragon) && isDraw(myBoard.getTeamOne())) {
+			return true;
+		}
+
+		// Print board
 		myBoard.printGameBoard();
 
-		// Step one: perform minimax search
+		// Perform minimax search
 		GameNode n = AI.MinimaxValue(new GameNode(new State(Board.actualGameState.getBoard()), 0, 0), true);
 
-		// Step two: apply the chosen state to our board.
+		// Apply the chosen state to our board.
+		// Note that this flips the dragonsJustMoved boolean in the state
+		// without us having to explicitly call nextTurn()
 		myBoard.applyState(n.getState());
 
-		// Step Three: Determine if the move resulted in a draw
-		if (n.getValue() == 0) {
-			return true;
-		} else {
-			return false;
-		}
+		return false;
 	}
 
 	/**
@@ -370,8 +384,8 @@ public class Controller {
 		System.out.println("~~~~~~~~~~~~~~~");
 
 		/* Initialize the AI */
-		// Minimax AI = new Minimax(myBoard);
-		AlphaBeta AI = new AlphaBeta(myBoard);
+		Minimax AI = new Minimax(myBoard);
+		//AlphaBeta AI = new AlphaBeta(myBoard);
 
 		/* Let the player pick a team, AI will be the other team */
 		Pattern whichTeam = Pattern.compile("[DK]");
@@ -399,7 +413,7 @@ public class Controller {
 					break;
 				}
 			} else {
-				if (playAlphaBetaTurn(AI, true)) {
+				if (playMinimaxTurn(AI, true)) {
 					draw = true;
 					break;
 				}
@@ -423,7 +437,7 @@ public class Controller {
 					break;
 				}
 			} else {
-				if (playAlphaBetaTurn(AI, false)) {
+				if (playMinimaxTurn(AI, false)) {
 					draw = true;
 					break;
 				}

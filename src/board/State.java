@@ -7,8 +7,8 @@ public class State {
 	private char[][] potentialBoard = new char[5][5];
 	private boolean dragonsJustMoved;
 	private boolean potentialBoardWins;
-	public Tuple oldPosition = null;
-	public Tuple newPosition = null;
+	private Tuple oldPosition = null;
+	private Tuple newPosition = null;
 
 	// Initial static board constructor, used once in Board.java
 	public State(char[][] newBoard) {
@@ -48,10 +48,10 @@ public class State {
 				setChar(x, y, s.getChar(x, y));
 			}
 		}
+		// No need to clone, passing references here works fine
 		this.oldPosition = oldPosition;
 		this.newPosition = newPosition;
-
-		// Need to account for dragons being eaten here
+		
 		potentialBoard[oldPosition.getX()][oldPosition.getY()] = '_';
 		potentialBoard[newPosition.getX()][newPosition.getY()] = letter;
 		dragonsJustMoved = !s.dragonsJustMoved();
@@ -68,6 +68,14 @@ public class State {
 
 	public char getChar(Tuple x) {
 		return potentialBoard[x.getX()][x.getY()];
+	}
+	
+	public Tuple getOldPosition() {
+		return oldPosition;
+	}
+
+	public Tuple getNewPosition() {
+		return newPosition;
 	}
 
 	public void setChar(int x, int y, char newChar) {

@@ -223,27 +223,37 @@ public class Board {
 	 */
 	public LinkedList<State> successors(State s) {
 		LinkedList<State> successors = new LinkedList<State>();
-		ArrayList<Tuple> currentMoves;
-		Tuple currentPosition;
-		ArrayList<gamePiece> currentTeam;
 
-		// Determine if we are giving a list of dragon states or king states
+		/* Get all the piece positions for the team of interest */
+		LinkedList<Tuple> teamPositions = new LinkedList<Tuple>();
+		char[][] stateBoard = s.getBoard();
+
 		if (s.dragonsJustMoved()) {
-			currentTeam = teamOne;
+			for (int x = 0; x < 5; x++) {
+				for (int y = 0; y < 5; y++) {
+					char curPiece = stateBoard[x][y];
+					if (curPiece == 'K') {
+						teamPositions.addFirst(new Tuple(x, y));
+					} else if (curPiece == 'G') {
+						teamPositions.addLast(new Tuple(x, y));
+					}
+				}
+			}
 		} else {
-			currentTeam = teamTwo;
+			for (int x = 0; x < 5; x++) {
+				for (int y = 0; y < 5; y++) {
+					if (stateBoard[x][y] == 'D') {
+						teamPositions.add(new Tuple(x, y));
+					}
+				}
+			}
 		}
 
-		// Loop over all the team's pieces and find all the possible successor
-		// states from the given state
-		for (gamePiece pieceToCheck : currentTeam) {
-			currentPosition = pieceToCheck.getPosition();
-			currentMoves = availableMoves(s, currentPosition.getX(), currentPosition.getY());
-
-			// Loop over all possible moves for current piece and add their
-			// resulting state to the list
-			for (Tuple move : currentMoves) {
-				successors.addLast(new State(s, currentPosition, move, pieceToCheck.getMyLetter()));
+		ArrayList<Tuple> possibleMoves;
+		for (Tuple currentPosition : teamPositions) {
+			possibleMoves = availableMoves(s, currentPosition.getX(), currentPosition.getY());
+			for (Tuple move : possibleMoves) {
+				successors.addLast(new State(s, currentPosition, move, s.getChar(currentPosition)));
 			}
 		}
 
@@ -310,13 +320,11 @@ public class Board {
 	 *
 	 */
 	public double utility(State s) {
-		if (terminalState(s)) {
-			if (s.dragonsJustMoved() && s.potentialBoardWins()) {
-				return 1000;
-			} else if (!s.dragonsJustMoved() && s.potentialBoardWins()) {
+		if (s.potentialBoardWins()) {
+			if (!s.dragonsJustMoved()) {
 				return -1000;
 			} else {
-				return 0;
+				return 1000;
 			}
 		} else {
 			LinkedList<Tuple> kingTeam = new LinkedList<Tuple>();
@@ -386,8 +394,6 @@ public class Board {
 						+ Math.abs(dragon.getY() - kingPosition.getY());
 				returnValue -= (distance * 2);
 			}
-
-			// System.out.println(returnValue);
 			return returnValue;
 		}
 	}
@@ -579,6 +585,7 @@ public class Board {
 	 */
 	protected void checkGuardCapture() {
 		LinkedList<gamePiece> killList = new LinkedList<gamePiece>();
+
 		for (gamePiece currentPiece : teamOne) {
 			// Only consider alive guards
 			if ((currentPiece.getMyLetter() != 'G') || (currentPiece.isAlive() == false)) {
@@ -597,12 +604,13 @@ public class Board {
 				currentPiece.kill();
 				killList.add(currentPiece);
 
-				// For now, deciding not to remove dead pieces from teamOne's
-				// list. Uncomment line below if this is an issue
-				// teamOne.remove(currentPiece);
-
 				// The dragon must be replacing a guard, otherwise there is a
 				// serious problem
+				if (actualGameState.getChar(x, y) != 'G') {
+					throw new IllegalStateException(
+							"Dragons tried to 'capture' a non-guard in checkGuard, which is not allowed! ");
+				}
+
 				actualGameState.setChar(x, y, 'D');
 			}
 		}
@@ -625,7 +633,8 @@ public class Board {
 		for (gamePiece pieceToCheck : teamTwo) {
 			if (pieceToCheck.checkPosition(new Tuple(x, y))) {
 				pieceToCheck.kill();
-				teamTwo.remove(pieceToCheck); // Note: this might break stuff.
+				teamTwo.remove(pieceToCheck); // Note: this is only safe because
+												// we are immediately returning.
 				return true;
 			}
 		}
@@ -633,6 +642,12 @@ public class Board {
 	}
 
 	protected void applyState(State s) {
+
+		if (s.getOldPosition() == null || s.getNewPosition() == null) {
+			throw new IllegalStateException(
+					"The AI search did not select a move to make in applyState! Check that a valid depth limit was selected.");
+		}
+
 		actualGameState = s.clone();
 		LinkedList<Tuple> t1 = new LinkedList<Tuple>();
 		LinkedList<Tuple> t2 = new LinkedList<Tuple>();
@@ -660,8 +675,8 @@ public class Board {
 		}
 
 		for (gamePiece curPiece : team) {
-			if (curPiece.checkPosition(s.oldPosition)) {
-				curPiece.changePosition(s.newPosition);
+			if (curPiece.checkPosition(s.getOldPosition())) {
+				curPiece.changePosition(s.getNewPosition());
 			}
 		}
 
@@ -674,8 +689,16 @@ public class Board {
 	 *            not used.
 	 */
 	public static void main(String[] args) {
-		// we should probably write some testing code here.
 		Board testBoard = new Board();
-		testBoard.printGameBoard();
+
+		char[][] arr = { { '_', '_', 'D', 'K', 'D' }, { 'D', 'D', 'G', 'G', '_' }, { '_', 'D', '_', 'D', '_' },
+				{ '_', '_', '_', '_', '_' }, { '_', '_', '_', '_', '_' } };
+		State testState = new State(arr);
+
+		testState.nextTurn();
+		System.out.println(testState);
+
+		System.out.println(testBoard.successors(testState));
+
 	}
 }
