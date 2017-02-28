@@ -309,7 +309,9 @@ public class Board {
 		}
 		return null;
 	}
-
+	
+	
+	//Might need to update the utility function to be usable for both king and Dragon AI
 	/**
 	 * Returns the utility value of a current state. Not necessarily a terminal
 	 * state. When not a terminal state, attempts to estimate who is closer to
