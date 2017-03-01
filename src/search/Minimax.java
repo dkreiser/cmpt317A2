@@ -13,7 +13,7 @@ public class Minimax extends Search {
 		this.gameBoard = b;
 		// takes about a minute at 6
 		// mathematically 8 should take around 5 hours.
-		this.depthLimit = 5;
+		this.depthLimit = 4; //keep this number even
 	}
 
 	public GameNode MinimaxValue(GameNode s, boolean MaxStarts, boolean AIisDragon) {

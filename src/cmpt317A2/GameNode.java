@@ -9,7 +9,7 @@ public class GameNode {
 	protected int depth;
 
 	public GameNode(State state, double value, int depth) {
-		this.state = state;
+		this.state = state.clone();
 		this.value = value;
 		this.depth = depth;
 	}

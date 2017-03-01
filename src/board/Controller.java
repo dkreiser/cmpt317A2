@@ -331,8 +331,7 @@ public class Controller {
 		GameNode n = null;
 		
 		if (AlphaBeta.class.isInstance(AI)) {
-			n = ((AlphaBeta)AI).alphaBeta(new GameNode(Board.actualGameState.clone(), 0, 0), Double.NEGATIVE_INFINITY,
-					Double.POSITIVE_INFINITY, true, AIisDragon);
+			n = ((AlphaBeta)AI).alphaBeta(new GameNode(Board.actualGameState.clone(), 0, 0), true, AIisDragon);
 		} else if (Minimax.class.isInstance(AI)) {
 			n = ((Minimax)AI).MinimaxValue(new GameNode(Board.actualGameState.clone(), 0, 0), true, AIisDragon);
 		}

@@ -566,7 +566,17 @@ public class Board {
 	 *         horizontal/vertical directions, false otherwise.
 	 */
 	protected boolean dragonsWin(State s, Tuple kingPosition) {
-		return getNumSurroundingDragons(s, kingPosition.getX(), kingPosition.getY()) >= 3;
+		if (getNumSurroundingDragons(s, kingPosition.getX(), kingPosition.getY()) == 4) {
+			return true;
+		} else if (getNumSurroundingDragons(s, kingPosition.getX(), kingPosition.getY()) == 3) {
+			if(kingPosition.getX() == 0 || kingPosition.getX() == 4 || kingPosition.getY() == 0 || kingPosition.getY() == 4){
+				return true;
+			}
+			if (getNumSurroundingGuards(s, kingPosition.getX(), kingPosition.getY()) == 1){
+				return true;
+			}
+		}
+		return false;
 	}
 
 	/**
@@ -671,9 +681,12 @@ public class Board {
 		ArrayList<gamePiece> team;
 		if (s.dragonsJustMoved()) {
 			team = teamTwo;
-
 		} else {
 			team = teamOne;
+		}
+		
+		if (t2.size() < teamTwo.size()){
+			this.killDragon(s.getNewPosition().getX(), s.getNewPosition().getY());
 		}
 
 		for (gamePiece curPiece : team) {
@@ -681,6 +694,8 @@ public class Board {
 				curPiece.changePosition(s.getNewPosition());
 			}
 		}
+		
+		//still have to remove the dead dragon from teamTwos
 
 	}
 
