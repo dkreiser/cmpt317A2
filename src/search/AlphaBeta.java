@@ -1,5 +1,6 @@
 package search;
 
+import java.util.Iterator;
 import java.util.LinkedList;
 
 import board.Board;
@@ -27,29 +28,35 @@ public class AlphaBeta extends Search {
 			if (AIisDragon) {
 				s.setValue(gameBoard.utility(s.getState()));
 			} else {
+				// Might need to do something more appropriate here if AI is playing as king
 				s.setValue(-1 * gameBoard.utility(s.getState()));
 			}
-		} else {
-			LinkedList<State> successors = gameBoard.successors(s.getState());
-			double bestValue = alpha;
-	
-			for (State currState : successors){
-				GameNode curr = new GameNode(currState, 0, s.getDepth() + 1);
-				
-				GameNode n = alphaBetaMin(curr.clone(), alpha, beta, AIisDragon);
-				
-				bestValue = Math.max(bestValue, n.getValue());
-				
-				if (bestValue >= beta) {
-					bestValue = n.getValue();
-					s = curr.clone();
-					s.setValue(bestValue);
-					break;
-				}
-				alpha = Math.max(alpha, bestValue);
-			}
+			
+			return s;
 		}
-		return s;
+
+		LinkedList<State> successors = gameBoard.successors(s.getState());
+		GameNode best = null;
+		double bestValue = Double.NEGATIVE_INFINITY;
+		Iterator<State> it = successors.iterator();
+
+		while (it.hasNext()) {
+			State current = it.next();
+			GameNode curr = new GameNode(current, 0, s.getDepth() + 1);
+			GameNode n = alphaBetaMin(curr, alpha, beta, AIisDragon);
+			if (n.getValue() > bestValue) {
+				bestValue = n.getValue();
+				best = curr.clone();
+				best.setValue(bestValue);
+			}
+			
+			if (bestValue >= beta){
+				break;
+			}
+			
+			alpha = Math.max(alpha, bestValue);
+		}
+		return best;
 	}
 
 	private GameNode alphaBetaMin(GameNode s, Double alpha, Double beta, boolean AIisDragon) {
@@ -57,28 +64,34 @@ public class AlphaBeta extends Search {
 			if (AIisDragon) {
 				s.setValue(gameBoard.utility(s.getState()));
 			} else {
+				// Might need to do something more appropriate here if AI is playing as king
 				s.setValue(-1 * gameBoard.utility(s.getState()));
 			}
-		} else {
-			LinkedList<State> successors = gameBoard.successors(s.getState());
-			double bestValue = beta;
-	
-			for (State currState : successors){
-				GameNode curr = new GameNode(currState, 0, s.getDepth() + 1);
-				
-				GameNode n = alphaBetaMax(curr.clone(), alpha, beta, AIisDragon);
-				
-				bestValue = Math.min(bestValue, n.getValue());
-				
-				if (bestValue <= alpha) {
-					bestValue = n.getValue();
-					s = curr.clone();
-					s.setValue(bestValue);
-					break;
-				}
-				beta = Math.min(beta, bestValue);
-			}
+			
+			return s;
 		}
-		return s;
+		
+		LinkedList<State> successors = gameBoard.successors(s.getState());
+		GameNode best = null;
+		double bestValue = Double.POSITIVE_INFINITY;
+		Iterator<State> it = successors.iterator();
+
+		while (it.hasNext()) {
+			State current = it.next();
+			GameNode curr = new GameNode(current, 0, s.getDepth() + 1);
+			GameNode n = alphaBetaMax(curr, alpha, beta, AIisDragon);
+			if (n.getValue() < bestValue) {
+				bestValue = n.getValue();
+				best = curr.clone();
+				best.setValue(bestValue);
+			}
+			
+			if (bestValue <= alpha){
+				break;
+			}
+			
+			beta = Math.min(beta, bestValue);
+		}
+		return best;
 	}
 }
