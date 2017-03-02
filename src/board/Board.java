@@ -81,7 +81,6 @@ public class Board {
 			}
 			System.out.println();
 		}
-		System.out.println("Dragons just moved? " + actualGameState.dragonsJustMoved());
 		System.out.println("\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
 	}
 

@@ -20,6 +20,13 @@ public class Controller {
 	 * one move by kings
 	 */
 	final private int turnLimit = 25;
+	
+	/**
+	 * a hard-coded state limit: If a "state" appears 8 times then we will call
+	 * the game a draw. This number may have to be increased a bit since we are
+	 * only checking board characters, not specific pieces.
+	 */
+	final private int stateLimit = 5;
 
 	/**
 	 * a HashMap that keeps all of the states.
@@ -138,6 +145,10 @@ public class Controller {
 			states.put(stateString, 0);
 		}
 		
+		if(states.get(stateString) == stateLimit){
+			return true;
+		}
+		
 		Board.actualGameState.nextTurn();
 
 		return false;
@@ -231,6 +242,10 @@ public class Controller {
 			states.put(stateString, states.get(stateString) + 1);
 		} else {
 			states.put(stateString, 0);
+		}
+		
+		if(states.get(stateString) == stateLimit){
+			return true;
 		}
 		
 		Board.actualGameState.nextTurn();
@@ -376,6 +391,10 @@ public class Controller {
 			states.put(stateString, 0);
 		}
 		
+		if(states.get(stateString) == stateLimit){
+			return true;
+		}
+		
 		return false;
 	}
 
@@ -401,38 +420,60 @@ public class Controller {
 			input1 = myScanner.nextLine();
 			userInput1 = whichTeam1.matcher(input1);
 		}
-
+		
 		// Set team value based on user input
 		char AIchoice = input1.charAt(0);
 		
-		/* Initialize the AI */
-		Search AI;
+		/* Let the player select two or one AI*/
+		Pattern howManyAI = Pattern.compile("[1-2]");
+		System.out.print("Would you like to play with 1 AI or watch 2 AI play?: ");
+		String inputHowMany = myScanner.nextLine();
+		Matcher howMany = howManyAI.matcher(inputHowMany);
+
+		while (!howMany.matches()) {
+			System.out.print("Would you like to play with 1 AI or watch 2 AI play?: ");
+			inputHowMany = myScanner.nextLine();
+			howMany = howManyAI.matcher(inputHowMany);
+		}
 		
-		if (AIchoice == 'M') {
-			AI = new Minimax(myBoard);
-		} else {
-			AI = new AlphaBeta(myBoard);
-		}
-
-		/* Let the player pick a team, AI will be the other team */
-		Pattern whichTeam = Pattern.compile("[DK]");
-		System.out.print("Please enter 'D' to play as dragons or 'K' to play as the Mad King: ");
-		String input = myScanner.nextLine();
-		Matcher userInput = whichTeam.matcher(input);
-
-		while (!userInput.matches()) {
+		char numAI = inputHowMany.charAt(0);
+		
+		/* Initialize the AI */
+		Search AI1;
+		
+		/* Initialize the playerTeam */
+		char playerTeam = '_';
+		
+		if(numAI == '1'){
+			if (AIchoice == 'M') {
+				AI1 = new Minimax(myBoard);
+			} else {
+				AI1 = new AlphaBeta(myBoard);
+			}
+			/* Let the player pick a team, AI will be the other team */
+			Pattern whichTeam = Pattern.compile("[DK]");
 			System.out.print("Please enter 'D' to play as dragons or 'K' to play as the Mad King: ");
-			input = myScanner.nextLine();
-			userInput = whichTeam.matcher(input);
-		}
+			String input = myScanner.nextLine();
+			Matcher userInput = whichTeam.matcher(input);
 
-		// Set team value based on user input
-		char playerTeam = input.charAt(0);
+			while (!userInput.matches()) {
+				System.out.print("Please enter 'D' to play as dragons or 'K' to play as the Mad King: ");
+				input = myScanner.nextLine();
+				userInput = whichTeam.matcher(input);
+			}
+			// Set team value based on user input
+			playerTeam = input.charAt(0);
+		} else {
+			if (AIchoice == 'M') {
+				AI1 = new Minimax(myBoard);
+			} else {
+				AI1 = new AlphaBeta(myBoard);
+			}
+		}
 
 		/* Primary Game Loop */
 		int moves = 0;
 		for (; moves < turnLimit; moves++) {
-
 			// Dragons always move first
 			if (playerTeam == 'D') {
 				if (playerDragonTurn()) {
@@ -440,12 +481,12 @@ public class Controller {
 					break;
 				}
 			} else {
-				if (playAITurn(AI, true)) {
+				if (playAITurn(AI1, true)) {
 					draw = true;
 					break;
 				}
 			}
-
+	
 			// Do post-move checks to see if the game is over or if pieces need
 			// to be captured
 			myBoard.checkGuardCapture();
@@ -456,7 +497,16 @@ public class Controller {
 			if (myBoard.kingWins(myBoard.getKing().getPosition())) {
 				break;
 			}
-
+			
+			//If there is two AI playing, then we add a "pause"
+			if(numAI == '2'){
+				try {
+					Thread.sleep(1500);
+				} catch (InterruptedException e) {
+					//Won't happen
+				}
+			}
+	
 			// King always move second
 			if (playerTeam == 'K') {
 				if (playerKingTurn()) {
@@ -464,12 +514,12 @@ public class Controller {
 					break;
 				}
 			} else {
-				if (playAITurn(AI, false)) {
+				if (playAITurn(AI1, false)) {
 					draw = true;
 					break;
 				}
 			}
-
+			
 			// Do post-move checks to see if the game is over or if pieces need
 			// to be captured
 			myBoard.checkGuardCapture();
@@ -480,9 +530,16 @@ public class Controller {
 			if (myBoard.kingWins(myBoard.getKing().getPosition())) {
 				break;
 			}
-
+			//If there is two AI playing, then we add a "pause"
+			if(numAI == '2'){
+				try {
+					Thread.sleep(1500);
+				} catch (InterruptedException e) {
+					//Won't happen
+				}
+			}
 		}
-
+		
 		/*
 		 * If the primary loop above exited because we exceeded 50 moves, the
 		 * game is a draw
