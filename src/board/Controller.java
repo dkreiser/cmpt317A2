@@ -1,6 +1,7 @@
 package board;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -20,9 +21,10 @@ public class Controller {
 	 */
 	final private int turnLimit = 25;
 
-	/** we never want to make a duplicate copy of this class. */
-	private Controller() {
-	}
+	/**
+	 * a HashMap that keeps all of the states.
+	 */
+	HashMap<String,Integer> states;
 
 	/** an instance of the game board, we only ever want one */
 	private Board myBoard = new Board();
@@ -30,6 +32,11 @@ public class Controller {
 	/** a scanner created to handle user input */
 	private Scanner myScanner = new Scanner(System.in);
 
+	/** we never want to make a duplicate copy of this class. */
+	private Controller() {
+		states = new HashMap<String,Integer>();
+	}
+	
 	/**
 	 * Called when the human player is playing as King to execute their turn
 	 * 
@@ -123,6 +130,14 @@ public class Controller {
 		// then move it.
 		moveUnit(myUnits, moveList, xCoordinate, yCoordinate, pieceToMove);
 
+		String stateString = Board.actualGameState.stringify();
+		
+		if(states.containsKey(stateString)){
+			states.put(stateString, states.get(stateString) + 1);
+		} else {
+			states.put(stateString, 0);
+		}
+		
 		Board.actualGameState.nextTurn();
 
 		return false;
@@ -210,6 +225,14 @@ public class Controller {
 		// then move it.
 		moveUnit(myUnits, moveList, xCoordinate, yCoordinate, pieceToMove);
 
+		String stateString = Board.actualGameState.stringify();
+		
+		if(states.containsKey(stateString)){
+			states.put(stateString, states.get(stateString) + 1);
+		} else {
+			states.put(stateString, 0);
+		}
+		
 		Board.actualGameState.nextTurn();
 
 		return false;
@@ -344,7 +367,15 @@ public class Controller {
 		// Note that this flips the dragonsJustMoved boolean in the state
 		// without us having to explicitly call nextTurn()
 		myBoard.applyState(n.getState());
-
+		
+		String stateString = n.getState().stringify();
+		
+		if(states.containsKey(stateString)){
+			states.put(stateString, states.get(stateString) + 1);
+		} else {
+			states.put(stateString, 0);
+		}
+		
 		return false;
 	}
 

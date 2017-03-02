@@ -11,7 +11,7 @@ public class AlphaBeta extends Search {
 
 	public AlphaBeta(Board b) {
 		this.gameBoard = b;
-		this.depthLimit = 5;
+		this.depthLimit = 8;
 	}
 	
 	public GameNode alphaBeta(GameNode s, boolean MaxStarts, boolean AIisDragon) {

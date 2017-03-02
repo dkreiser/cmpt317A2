@@ -102,6 +102,16 @@ public class State {
 		this.potentialBoardWins = true;
 	}
 
+	public String stringify(){
+		String returnString = "";
+		for(int i = 0; i < 5; i++){
+			for(int k = 0; k < 5; k++){
+				returnString += potentialBoard[i][k];
+			}
+		}
+		return returnString;
+	}
+	
 	public State clone() {
 		char[][] newBoard = this.getBoard();
 		return new State(newBoard, dragonsJustMoved, potentialBoardWins, oldPosition, newPosition);
